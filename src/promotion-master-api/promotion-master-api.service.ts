@@ -1,0 +1,250 @@
+import { HttpException, HttpStatus, Injectable, Logger, NotFoundException} from '@nestjs/common';
+import { CreatePromotionMasterApiDto } from './dto/create-promotion-master-api.dto';
+import { UpdatePromotionMasterApiDto } from './dto/update-promotion-master-api.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { MasterPromotionRepository } from 'src/database_table/repository/master-promotion.repository';
+import { PromotionCategoryRepository } from 'src/database_table/repository/ms_promotion_category.repository';
+
+@Injectable()
+export class PromotionMasterApiService {
+  private readonly logger = new Logger(PromotionMasterApiService.name);
+  constructor(    
+    @InjectRepository(MasterPromotionRepository)
+    @InjectRepository(PromotionCategoryRepository)
+    private readonly masterPromotionRepository: MasterPromotionRepository,
+    private readonly promotionCategoryRepository: PromotionCategoryRepository,
+  ) {
+  }
+
+  async promotionCategoryList() {
+    this.logger.log('Returning all Promotion Category');
+    try{
+        const category = await this.promotionCategoryRepository
+          .createQueryBuilder('Category')
+          .select([
+            'Category.id AS category_id',
+            'Category.name AS category_name',
+            'Category.name_bn AS category_name_bn',
+            'Category.keyword as category_keyword'
+          ])
+          .where("Category.status = :status", { status: 1 })
+          .getRawMany();
+
+        if (!category) {
+          throw new NotFoundException('Promotion Category not found.');
+        }        
+        return category;
+    } catch(errror){
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async create_promotion(CreatePromotionMasterApiDto: CreatePromotionMasterApiDto[]) {
+    this.logger.log('Adding New Promotion');
+    try{
+      const promotionId = await this.preparePromotionId(Number(CreatePromotionMasterApiDto[0].promotion_category_id));
+      const apiData = CreatePromotionMasterApiDto[0];
+      
+      const insertData = {
+        "promotion_id" : String(promotionId),
+        "promotion_category_id" : apiData.promotion_category_id !== undefined ? Number(apiData.promotion_category_id) : null,
+        "professional_id" : apiData.professional_id !== undefined ? Number(apiData.professional_id) : null,
+        "promotion_description" : apiData.promotion_description !== undefined ? String(apiData.promotion_description) : null,      
+        "promotion_value" : apiData.promotion_value !== undefined ? Number(apiData.promotion_value) : null,
+        "usable_value" : apiData.usable_value !== undefined ? Number(apiData.usable_value) : null,
+        "comments" : apiData.comments !== undefined ? String(apiData.comments) : null,
+        "created_by" : apiData.created_by !== undefined ? Number(apiData.created_by) : null,
+      };
+
+      const insertLog = await this.masterPromotionRepository.insert(insertData);     
+      return (insertLog.identifiers[0].id > 0) ? true : false;
+    } catch(errror){
+       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    } 
+  }
+
+  async byProfessionalPromotionSummary() {
+    this.logger.log('Returning all Promotion');
+    try{
+        const promotionInfo = await this.masterPromotionRepository
+          .createQueryBuilder('Promotion')    
+          .select([
+            'professionalInfo.category_id AS professional_category_id',
+            'Promotion.professional_id AS professional_id',
+            'professionalInfo.name AS professional_name',
+            'professionalInfo.designation AS designation',
+            'professionalInfo.department AS department',
+            'professionalInfo.organization AS organization',
+            'SUM(Promotion.promotion_value) AS promotion_value',
+            'SUM(Promotion.usable_value) AS usable_value'
+          ])
+          .innerJoin('ms_professional_list', 'professionalInfo', '`professionalInfo`.`id` = `Promotion`.`professional_id`')
+          .where("Promotion.status = :status", { status: 1 })
+          .groupBy('Promotion.professional_id')
+          .orderBy('Promotion.professional_id', 'DESC')
+          .getRawMany();
+
+        if (!promotionInfo) {
+          throw new NotFoundException('Promotion List not found.');
+        }        
+        return promotionInfo;
+    } catch(errror){
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async byProfessionalPromotionList(params) {
+    this.logger.log('Returning By Professional Promotion List');
+    try{
+      let {professional_id, limit} = params;
+      const dateRange = await this.calculateDateRange(limit);
+      const promotionInfo = await this.masterPromotionRepository
+        .createQueryBuilder('Promotion')
+        .select([
+          'Promotion.promotion_category_id AS promotion_category_id',
+          'Promotion.professional_id AS professional_id',
+          'Promotion.promotion_id AS promotion_id',
+          'Promotion.promotion_value AS promotion_value',
+          'Promotion.usable_value AS usable_value',
+          'Promotion.created_by AS issued_by',
+          'DATE_FORMAT(Promotion.created, "%Y-%m-%d") as created_date'
+        ])
+        .where("Promotion.status = :status", { status: 1 })
+        .where("Promotion.professional_id = :professional_id", { professional_id: professional_id })
+        .andWhere(`DATE(Promotion.created) BETWEEN '${dateRange.start_date}' AND '${dateRange.last_date}'`)
+        .orderBy('Promotion.id', 'DESC')
+        .getRawMany();
+
+      if (!promotionInfo) {
+        throw new NotFoundException('Promotion List not found.');
+      }        
+      return promotionInfo;
+    } catch(errror){
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async promotionDetailsById(promotion_id: number) {
+    this.logger.log('Returning By Professional Promotion List');
+    try{
+      console.log('promotion_id ' + promotion_id);
+      const promotionInfo = await this.masterPromotionRepository
+        .createQueryBuilder('Promotion')    
+        .select([
+          'Promotion.id AS id',
+          'Promotion.promotion_id AS promotion_id',
+          'professionalInfo.professional_id AS professional_id',
+          'Promotion.promotion_category_id AS promotion_category_id',
+          'PromotionCategory.name AS promotion_category_name',
+          'professionalInfo.name AS professional_name',
+          'professionalInfo.designation AS designation',
+          'professionalInfo.department AS department',
+          'professionalInfo.organization AS organization',
+          'professionalInfo.mobile_number AS mobile_number',
+          'professionalInfo.contract_value AS contract_value',
+          'Promotion.promotion_value AS promotion_value',
+          'Promotion.promotion_description AS promotion_description',
+          'Promotion.comments AS promotion_comment',
+          'Promotion.created_by AS issued_by',
+          'DATE_FORMAT(Promotion.created, "%Y-%m-%d") as created_date'
+        ])
+        .innerJoin('ms_professional_list', 'professionalInfo', '`professionalInfo`.`id` = `Promotion`.`professional_id`')
+        .innerJoin('ms_promotion_category', 'PromotionCategory', '`Promotion`.`promotion_category_id` = `PromotionCategory`.`id`')
+        .where("Promotion.status = :status", { status: 1 })
+        .where("Promotion.id = :promotion_id", { promotion_id: promotion_id })
+        .getRawMany();
+
+      if (!promotionInfo) {
+        throw new NotFoundException('Promotion List not found.');
+      } 
+
+      if (!promotionInfo) {
+        throw new NotFoundException('Promotion List not found.');
+      }        
+      return promotionInfo;
+    } catch(errror){
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async preparePromotionId (promotion_category_id: number) {
+    try {
+      const promotionCategory = await this.promotionCategoryRepository.findOne({
+        where:{
+          id : promotion_category_id,
+          status : 1
+        }
+      });
+      const promotionList = await this.masterPromotionRepository.find();    
+      const promotion_id = promotionCategory.id_creation + await this.addingExtraZeros(String(promotionList.length + 1), 5);
+      return promotion_id;
+    } catch (error) {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async addingExtraZeros (str: string, max: number) {
+    try {
+      str = str.toString();
+      return str.length < max ? await this.addingExtraZeros("0" + str, max) : str;
+    } catch (error) {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async updatePromotion(id: number, updatePromotionMasterApiDto: UpdatePromotionMasterApiDto[]) {
+    this.logger.log('Updating Promotion Details');
+    try{
+      const updatePromotion = await this.masterPromotionRepository
+        .createQueryBuilder()
+        .update('ms_promotion_list')
+        .set({
+          promotion_category_id: updatePromotionMasterApiDto[0].promotion_category_id,
+          professional_id: updatePromotionMasterApiDto[0].professional_id,
+          promotion_description: updatePromotionMasterApiDto[0].promotion_description,
+          promotion_value: updatePromotionMasterApiDto[0].promotion_value,
+          usable_value: updatePromotionMasterApiDto[0].usable_value,
+          comments: updatePromotionMasterApiDto[0].comments,
+          updated_by: updatePromotionMasterApiDto[0].updated_by
+        })
+        .where("id = :id", { id: id })
+        .execute();
+        return (updatePromotion.affected > 0) ? true : false;
+    } catch(errror){
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async calculateDateRange(limit: string){
+    try {
+      const currentdate = new Date();
+      let firstday: Date, lastday: Date, firstDayRange: string, lastDayRange: string;
+      if(limit == 'all'){
+        firstday = await this.getFirstDayOfYear(2022);
+        lastday = currentdate;
+      }
+      else if(limit == 'week'){
+        firstday = new Date(currentdate.setDate(currentdate.getDate() - currentdate.getDay()));
+        lastday = new Date(currentdate.setDate(currentdate.getDate() - currentdate.getDay()+6));
+      }
+      else if(limit == 'month'){
+        firstday = new Date(currentdate.getFullYear(), currentdate.getMonth(), 1);
+        lastday = new Date(currentdate.getFullYear(), currentdate.getMonth() + 1, 0);
+      }
+      else if(limit == 'lastmonth'){
+        firstday = new Date(currentdate.getFullYear(), currentdate.getMonth() - 1, 1);
+        lastday = new Date(currentdate.getFullYear(), currentdate.getMonth() - 1 + 1, 0);
+      }
+      firstDayRange = firstday.getFullYear() + "-" + ('0' + (firstday.getMonth() + 1)).slice(-2) + "-" + ('0' + firstday.getDate()).slice(-2);          
+      lastDayRange = lastday.getFullYear() + "-" + ('0' + (lastday.getMonth() + 1)).slice(-2) + "-" + ('0' + lastday.getDate()).slice(-2);
+      return {"start_date": firstDayRange, "last_date" : lastDayRange};
+    } catch(errror){
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async getFirstDayOfYear(year: number) {
+    return new Date(year, 0, 1);
+  }
+
+}
