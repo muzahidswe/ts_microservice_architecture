@@ -5,6 +5,7 @@ import { UpdateProfessionalMasterApiDto, ProfessionalStatusUpdateDto } from './d
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+
 @Controller('Professional-master-api')
 @UseGuards(JwtAuthGuard)
 @ApiTags('Professional Master Api')
