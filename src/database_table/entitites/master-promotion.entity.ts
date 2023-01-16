@@ -28,7 +28,16 @@ export class MasterPromotionEntity {
     comments: string;
 
     @Column()
-    status: number;
+    activation_status: number;
+
+    @Column()
+    request_status: number;
+
+    @CreateDateColumn()
+    activation_date: Date;
+
+    @CreateDateColumn()
+    request_date: Date;
     
     @Column()
     created_by: number;

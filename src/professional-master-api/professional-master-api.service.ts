@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Injectable, Logger, NotFoundException} from '@nestjs/common';
-import { CreateProfessionalMasterApiDto } from './dto/create-professional-master-api.dto';
-import { UpdateProfessionalMasterApiDto } from './dto/update-professional-master-api.dto';
+import { CreateProfessionalMasterApiDto, GetAllProfessionalFilterDto } from './dto/create-professional-master-api.dto';
+import { UpdateProfessionalMasterApiDto, ProfessionalStatusUpdateDto } from './dto/update-professional-master-api.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { GlobalService } from 'src/utils/global.service';
 import { MasterProfessionalListRepository } from 'src/database_table/repository/master-professional-list.repository';
 import { ProfessionalCategoryRepository } from 'src/database_table/repository/ms_professional_category.repository';
 import { ProfessionalPresenceDetailsRepository } from 'src/database_table/repository/ms_professional_presence_details.repository';
@@ -44,11 +45,11 @@ export class ProfessionalMasterApiService {
     }
   }
 
-  async create_professional(createProfessionalMasterApiDto: CreateProfessionalMasterApiDto[]) {
+  async create_professional(createProfessionalMasterApiDto: CreateProfessionalMasterApiDto) {
     this.logger.log('Adding New Professionals');
     try{
-      const professionalId = await this.prepareProfessionalId(Number(createProfessionalMasterApiDto[0].category_id));
-      const apiData = createProfessionalMasterApiDto[0];
+      const professionalId = await this.prepareProfessionalId(Number(createProfessionalMasterApiDto.category_id));
+      const apiData = {...createProfessionalMasterApiDto};
       const image_path = 'public/assets/images/professionals/';
       const base64_image = await this.base64_to_image(apiData.image_data, image_path, professionalId);
       const insertData = {
@@ -65,6 +66,7 @@ export class ProfessionalMasterApiService {
         "calendar_type" : apiData.calendar_type !== undefined ? String(apiData.calendar_type) : null,
         "chamber" : apiData.chamber !== undefined ? String(apiData.chamber) : null,
         "territory_id" : apiData.territory_id !== undefined ? Number(apiData.territory_id) : null,
+        "dep_id" : apiData.dep_id !== undefined ? Number(apiData.dep_id) : null,
         "route_id" : apiData.route_id !== undefined ? Number(apiData.route_id) : null,
         "contract_value" : apiData.contract_value !== undefined ? Number(apiData.contract_value) : null,
         "contract_tenure" : apiData.contract_tenure !== undefined ? Number(apiData.contract_tenure) : null,
@@ -72,8 +74,11 @@ export class ProfessionalMasterApiService {
         "baby_food_prescriptions" : apiData.baby_food_prescriptions !== undefined ? Number(apiData.baby_food_prescriptions) : null,
         "prescription_for_mother_smile" : apiData.prescription_for_mother_smile !== undefined ? Number(apiData.prescription_for_mother_smile) : null,
         "image_path" : String(image_path + professionalId + '.jpg'),
+        "request_date": new Date(),
         "comments" : apiData.comments !== undefined ? String(apiData.comments) : null,
-        "created_by" : apiData.created_by !== undefined ? Number(apiData.created_by) : null,
+        "activation_status" : 0, // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
+        "request_status" : 3, // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+        "created_by" : GlobalService.userId !== undefined ? Number(GlobalService.userId) : null,
       };
 
       const insertLog = await this.masterProfessionalListRepository.insert(insertData);
@@ -95,10 +100,11 @@ export class ProfessionalMasterApiService {
     } 
   }
 
-  async professionalList() {
+  async professionalList(getAllProfessionalFilterDto: GetAllProfessionalFilterDto) {
     this.logger.log('Returning all Professionals');
     try{
-        const professional = await this.masterProfessionalListRepository
+      const searchFilter = { ... getAllProfessionalFilterDto};  
+      const professionalList = await this.masterProfessionalListRepository
           .createQueryBuilder('Professional')    
           .select([
             'Professional.id AS id',
@@ -108,20 +114,55 @@ export class ProfessionalMasterApiService {
             'Professional.name AS professional_name',
             'Professional.designation AS designation',
             'Professional.department AS department',
+            // 'DivisionInfo.id AS division_id',
+            'DivisionInfo.slug AS division_name',
+            // 'AreaInfo.id AS area_id',
+            'AreaInfo.slug AS area_name',
+            // 'TerritoryInfo.id AS territory_id',
+            'TerritoryInfo.slug AS territory_name',
+            // 'section_mapping.dep_id AS point_id',
+            'DistributorPoint.name AS point_name',
             'Professional.academic_background AS academic_background',
             'Professional.visit_fee AS visit_fee'
           ])
+          // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
+          .addSelect(`CASE
+              WHEN Professional.activation_status = 0 THEN 'Inactive'
+              WHEN Professional.activation_status = 1 THEN 'Active'
+              WHEN Professional.activation_status = 2 THEN 'Deactivate'
+            END`, 'activation_status')
+          // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+          .addSelect(`CASE
+              WHEN Professional.request_status = 0 THEN 'Decline'
+              WHEN Professional.request_status = 1 THEN 'Approved'
+              WHEN Professional.request_status = 2 THEN 'Edit'
+              WHEN Professional.request_status = 3 THEN 'New'
+            END`, 'request_status')
           .innerJoin('ms_professional_category', 'Category', '`Professional`.`category_id` = `Category`.`id`')
-          .where("Professional.status = :status", { status: 1 })
-          .andWhere("Professional.territory_id IN(:territory_ids)", { territory_ids: [1] })
-          .andWhere("Professional.route_id IN(:route_ids)", { route_ids: [1] })
+          // to fetch Point
+          .innerJoin('master_dep', 'DistributorPoint', '`Professional`.`dep_id` = `DistributorPoint`.`id`')
+          // to fetch region | division
+          .innerJoin('master_dep_location_mapping', 'DivisionMapping', '`Professional`.`dep_id` = `DivisionMapping`.`dep_id` AND `DivisionMapping`.`location_type` = :location_type', { location_type: 18 })
+          .innerJoin('master_locations', 'DivisionInfo', '`DivisionMapping`.`location_id` = `DivisionInfo`.`id`')
+          // to fetch area
+          .innerJoin('master_dep_location_mapping', 'AreaMapping', '`Professional`.`dep_id` = `AreaMapping`.`dep_id` AND `AreaMapping`.`location_type` = :location_type', { location_type: 19 })
+          .innerJoin('master_locations', 'AreaInfo', '`AreaMapping`.`location_id` = `AreaInfo`.`id`')
+          // to fetch territory
+          .innerJoin('master_dep_location_mapping', 'TerritoryMapping', '`Professional`.`dep_id` = `TerritoryMapping`.`dep_id` AND `TerritoryMapping`.`location_type` = :location_type', { location_type: 20 })
+          .innerJoin('master_locations', 'TerritoryInfo', '`TerritoryMapping`.`location_id` = `TerritoryInfo`.`id`')
+          // .where("Professional.status = :status", { status: 1 })
+          // .andWhere("Professional.territory_id IN(:territory_ids)", { territory_ids: [1] })
+          // .andWhere("Professional.route_id IN(:route_ids)", { route_ids: [1] })
+          .andWhere(
+            (((searchFilter.point_ids).length != 0) ? professionalList => professionalList.where("Professional.dep_id IN (:point_ids)", { point_ids: searchFilter.point_ids }) : '')
+          )
           .orderBy('Professional.id', 'DESC')
           .getRawMany();
 
-        if (!professional) {
+        if (!professionalList) {
           throw new NotFoundException('Professional not found.');
         }        
-        return professional;
+        return professionalList;
     } catch(errror){
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
@@ -147,8 +188,14 @@ export class ProfessionalMasterApiService {
               'Professional.visit_fee AS visit_fee',
               'Professional.calendar_type AS calendar_type',
               'Professional.chamber AS chamber',
-              'Professional.territory_id AS territory_id',
-              'Professional.route_id AS route_id',
+              // 'DivisionInfo.id AS division_id',
+              'DivisionInfo.slug AS division_name',
+              // 'AreaInfo.id AS area_id',
+              'AreaInfo.slug AS area_name',
+              // 'TerritoryInfo.id AS territory_id',
+              'TerritoryInfo.slug AS territory_name',
+              // 'section_mapping.dep_id AS point_id',
+              'DistributorPoint.name AS point_name',
               'Professional.contract_value AS contract_value',
               'Professional.contract_tenure AS contract_tenure',
               'Professional.patients_per_week AS patients_per_week',
@@ -157,7 +204,31 @@ export class ProfessionalMasterApiService {
               'Professional.image_path AS image_path',
               'Professional.comments AS comments'
             ])
+            // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
+            .addSelect(`CASE
+                WHEN Professional.activation_status = 0 THEN 'Inactive'
+                WHEN Professional.activation_status = 1 THEN 'Active'
+                WHEN Professional.activation_status = 2 THEN 'Deactivate'
+              END`, 'activation_status')
+            // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+            .addSelect(`CASE
+                WHEN Professional.request_status = 0 THEN 'Decline'
+                WHEN Professional.request_status = 1 THEN 'Approved'
+                WHEN Professional.request_status = 2 THEN 'Edit'
+                WHEN Professional.request_status = 3 THEN 'New'
+              END`, 'request_status')
             .innerJoin('ms_professional_category', 'Category', '`Professional`.`category_id` = `Category`.`id`')
+            // to fetch Point
+            .innerJoin('master_dep', 'DistributorPoint', '`Professional`.`dep_id` = `DistributorPoint`.`id`')
+            // to fetch region | division
+            .innerJoin('master_dep_location_mapping', 'DivisionMapping', '`Professional`.`dep_id` = `DivisionMapping`.`dep_id` AND `DivisionMapping`.`location_type` = :location_type', { location_type: 18 })
+            .innerJoin('master_locations', 'DivisionInfo', '`DivisionMapping`.`location_id` = `DivisionInfo`.`id`')
+            // to fetch area
+            .innerJoin('master_dep_location_mapping', 'AreaMapping', '`Professional`.`dep_id` = `AreaMapping`.`dep_id` AND `AreaMapping`.`location_type` = :location_type', { location_type: 19 })
+            .innerJoin('master_locations', 'AreaInfo', '`AreaMapping`.`location_id` = `AreaInfo`.`id`')
+            // to fetch territory
+            .innerJoin('master_dep_location_mapping', 'TerritoryMapping', '`Professional`.`dep_id` = `TerritoryMapping`.`dep_id` AND `TerritoryMapping`.`location_type` = :location_type', { location_type: 20 })
+            .innerJoin('master_locations', 'TerritoryInfo', '`TerritoryMapping`.`location_id` = `TerritoryInfo`.`id`')
             .where("Professional.id = :professional_id", { professional_id: professional_id })
             .getRawMany();
       
@@ -214,8 +285,14 @@ export class ProfessionalMasterApiService {
               'Professional.visit_fee AS visit_fee',
               'Professional.calendar_type AS calendar_type',
               'Professional.chamber AS chamber',
-              'Professional.territory_id AS territory_id',
-              'Professional.route_id AS route_id',
+              // 'DivisionInfo.id AS division_id',
+              'DivisionInfo.slug AS division_name',
+              // 'AreaInfo.id AS area_id',
+              'AreaInfo.slug AS area_name',
+              // 'TerritoryInfo.id AS territory_id',
+              'TerritoryInfo.slug AS territory_name',
+              // 'section_mapping.dep_id AS point_id',
+              'DistributorPoint.name AS point_name',
               'Professional.contract_value AS contract_value',
               'Professional.contract_tenure AS contract_tenure',
               'Professional.patients_per_week AS patients_per_week',
@@ -224,7 +301,31 @@ export class ProfessionalMasterApiService {
               'Professional.image_path AS image_path',
               'Professional.comments AS comments'
             ])
+            // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
+            .addSelect(`CASE
+                WHEN Professional.activation_status = 0 THEN 'Inactive'
+                WHEN Professional.activation_status = 1 THEN 'Active'
+                WHEN Professional.activation_status = 2 THEN 'Deactivate'
+              END`, 'activation_status')
+            // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+            .addSelect(`CASE
+                WHEN Professional.request_status = 0 THEN 'Decline'
+                WHEN Professional.request_status = 1 THEN 'Approved'
+                WHEN Professional.request_status = 2 THEN 'Edit'
+                WHEN Professional.request_status = 3 THEN 'New'
+              END`, 'request_status')
             .innerJoin('ms_professional_category', 'Category', '`Professional`.`category_id` = `Category`.`id`')
+            // to fetch Point
+            .innerJoin('master_dep', 'DistributorPoint', '`Professional`.`dep_id` = `DistributorPoint`.`id`')
+            // to fetch region | division
+            .innerJoin('master_dep_location_mapping', 'DivisionMapping', '`Professional`.`dep_id` = `DivisionMapping`.`dep_id` AND `DivisionMapping`.`location_type` = :location_type', { location_type: 18 })
+            .innerJoin('master_locations', 'DivisionInfo', '`DivisionMapping`.`location_id` = `DivisionInfo`.`id`')
+            // to fetch area
+            .innerJoin('master_dep_location_mapping', 'AreaMapping', '`Professional`.`dep_id` = `AreaMapping`.`dep_id` AND `AreaMapping`.`location_type` = :location_type', { location_type: 19 })
+            .innerJoin('master_locations', 'AreaInfo', '`AreaMapping`.`location_id` = `AreaInfo`.`id`')
+            // to fetch territory
+            .innerJoin('master_dep_location_mapping', 'TerritoryMapping', '`Professional`.`dep_id` = `TerritoryMapping`.`dep_id` AND `TerritoryMapping`.`location_type` = :location_type', { location_type: 20 })
+            .innerJoin('master_locations', 'TerritoryInfo', '`TerritoryMapping`.`location_id` = `TerritoryInfo`.`id`')
             .where("Professional.professional_id = :professional_id", { professional_id: professional_id })
             .getRawMany();
       
@@ -312,6 +413,83 @@ export class ProfessionalMasterApiService {
           });
           await this.professionalPresenceDetailsRepository.insert(scheduleData);
         } 
+
+      return (updateProfessional.affected > 0) ? true : false;
+    } catch(errror){
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async professionalUpdateAsApproved(professionalStatusUpdateDto: ProfessionalStatusUpdateDto) {
+    this.logger.log('Updating Professional Status');
+    // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
+    // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+    try{
+      const payload = { ... professionalStatusUpdateDto};
+      const updateProfessional = await this.masterProfessionalListRepository
+        .createQueryBuilder()
+        .update('ms_professional_list')
+        .set({
+          activation_status : 1,
+          request_status : 1,
+          activation_date : new Date(),
+          updated_by : GlobalService.userId,
+        })
+        .andWhere("ms_professional_list.id IN(:professional_ids)", { professional_ids : payload.professional_ids })
+        .andWhere("ms_professional_list.activation_status IN(:activation_status)", { activation_status : [0, 2] })
+        // .andWhere("ms_professional_list.request_status IN(:activation_status)", { activation_status : [0, 1, 2, 3] })
+        .execute();
+
+      return (updateProfessional.affected > 0) ? true : false;
+    } catch(errror){
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async professionalUpdateAsDecline(professionalStatusUpdateDto: ProfessionalStatusUpdateDto) {
+    this.logger.log('Updating Professional Status');
+    // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
+    // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+    try{
+      const payload = { ... professionalStatusUpdateDto};
+      const updateProfessional = await this.masterProfessionalListRepository
+        .createQueryBuilder()
+        .update('ms_professional_list')
+        .set({
+          activation_status : 0,
+          request_status : 0,
+          activation_date : new Date(),
+          updated_by : GlobalService.userId,
+        })
+        .andWhere("ms_professional_list.id IN(:professional_ids)", { professional_ids : payload.professional_ids })
+        .andWhere("ms_professional_list.activation_status IN(:activation_status)", { activation_status : [0] })
+        // .andWhere("ms_professional_list.request_status IN(:activation_status)", { activation_status : [2, 3] })
+        .execute();
+
+      return (updateProfessional.affected > 0) ? true : false;
+    } catch(errror){
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+  }
+
+  async professionalUpdateAsDeactivate(professionalStatusUpdateDto: ProfessionalStatusUpdateDto) {
+    this.logger.log('Updating Professional Status');
+    // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
+    // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+    try{
+      const payload = { ... professionalStatusUpdateDto};
+      const updateProfessional = await this.masterProfessionalListRepository
+        .createQueryBuilder()
+        .update('ms_professional_list')
+        .set({
+          activation_status : 2,
+          activation_date : new Date(),
+          updated_by : GlobalService.userId,
+        })
+        .andWhere("ms_professional_list.id IN(:professional_ids)", { professional_ids : payload.professional_ids })
+        .andWhere("ms_professional_list.activation_status IN(:activation_status)", { activation_status : [1] })
+        // .andWhere("ms_professional_list.request_status IN(:activation_status)", { activation_status : [1] })
+        .execute();
 
       return (updateProfessional.affected > 0) ? true : false;
     } catch(errror){

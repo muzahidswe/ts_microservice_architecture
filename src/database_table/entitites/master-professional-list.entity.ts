@@ -46,6 +46,9 @@ export class MasterProfessionalList {
     territory_id: number;
 
     @Column()
+    dep_id: number;
+
+    @Column()
     route_id: number;
 
     @Column()
@@ -70,7 +73,16 @@ export class MasterProfessionalList {
     comments: string;
 
     @Column()
-    status: number;
+    activation_status: number;
+
+    @Column()
+    request_status: number;
+
+    @CreateDateColumn()
+    activation_date: Date;
+
+    @CreateDateColumn()
+    request_date: Date;
     
     @Column()
     created_by: number;

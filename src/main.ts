@@ -11,9 +11,7 @@ const { PORT, NODE_ENV } = process.env;
 declare const module: any;
 
 async function bootstrap() {
-    // const app = await NestFactory.create(AppModule, { cors: true });
     const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true });
-
     const config = new DocumentBuilder()
         .setTitle('Mothers Smile Professional Service API')
         .setDescription('')
@@ -32,19 +30,9 @@ async function bootstrap() {
             transformOptions: {
                 enableImplicitConversion: true,
             },
-            //exception factory for custom validation error message as key value pair
-            // exceptionFactory: (validationErrors: ValidationError[] = []) => {
-            //     const response_data = {};
-            //     validationErrors.filter(function (values) {
-            //         response_data[values.property] = Object.keys(values.constraints).map(
-            //             (k) => values.constraints[k],
-            //         );
-            //     });
-            //     return new BadRequestException(response_data);
-            // },
         }),
     );
-    //app.useGlobalInterceptors(new CustomResponseInterceptor());
+    
     app.useGlobalFilters(new HttpExceptionFilter());
     app.useStaticAssets(`${__dirname}/public`);
     app.use(bodyParser.json({limit: '15mb'}));
@@ -57,7 +45,7 @@ async function bootstrap() {
     await app.listen(PORT, () => {
         console.log(`Service : Professional service is running on port ${PORT}`);
         console.log(`Professional Service is running on ${NODE_ENV} environment`)
-      });
+    });
     if (module.hot) {
         module.hot.accept();
         module.hot.dispose(() => app.close());

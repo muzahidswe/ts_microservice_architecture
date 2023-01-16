@@ -8,3 +8,8 @@ export class UpdatePromotionMasterApiDto extends PartialType(CreatePromotionMast
     @IsNumber()
     updated_by: number;
 }
+
+export class PromotionStatusUpdateDto{
+    @IsNotEmpty()
+    promotion_ids: number[];
+}

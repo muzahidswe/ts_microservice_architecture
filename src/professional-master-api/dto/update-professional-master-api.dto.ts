@@ -13,3 +13,8 @@ export class UpdateProfessionalMasterApiDto extends PartialType(CreateProfession
     @IsNumber()
     updated_by: number;
 }
+
+export class ProfessionalStatusUpdateDto{
+    @IsNotEmpty()
+    professional_ids: number[];
+}

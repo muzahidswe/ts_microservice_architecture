@@ -61,6 +61,10 @@ export class CreateProfessionalMasterApiDto {
 
     @IsNotEmpty()
     @IsNumber()
+    dep_id: number;
+
+    @IsNotEmpty()
+    @IsNumber()
     route_id: number;
     
     @IsNotEmpty()
@@ -94,5 +98,10 @@ export class CreateProfessionalMasterApiDto {
     @IsNotEmpty()
     @IsNumber()
     created_by: number;
+}
+
+export class GetAllProfessionalFilterDto{
+    @IsNotEmpty()
+    point_ids: number[];
 }
 

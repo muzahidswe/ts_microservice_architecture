@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseArrayPipe, Req, Res, HttpStatus } from '@nestjs/common';
 import { PromotionMasterApiService } from './promotion-master-api.service';
 import { CreatePromotionMasterApiDto } from './dto/create-promotion-master-api.dto';
-import { UpdatePromotionMasterApiDto } from './dto/update-promotion-master-api.dto';
+import { UpdatePromotionMasterApiDto, PromotionStatusUpdateDto } from './dto/update-promotion-master-api.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
@@ -16,12 +16,13 @@ export class PromotionMasterApiController {
   async create_promotion(
     @Req() req: Request,
     @Res() res: Response,
-    @Body(new ParseArrayPipe({ items: CreatePromotionMasterApiDto }))
-    CreatePromotionMasterApiDto: CreatePromotionMasterApiDto[]) {
-    const promotionCreate = this.promotionMasterApiService.create_promotion(CreatePromotionMasterApiDto);
+    @Body() createPromotionMasterApiDto: CreatePromotionMasterApiDto
+  )
+  {
+    const promotionCreate = this.promotionMasterApiService.create_promotion(createPromotionMasterApiDto);
     const result = {
       'success' : true,
-      'message' : 'Promotion Added Successfully.',
+      'message' : promotionCreate ? 'Promotion Added Successfully.' : 'Promotion Added Failed.',
       'data' : []
     }
     res.status(HttpStatus.OK).json(result);
@@ -95,6 +96,54 @@ export class PromotionMasterApiController {
     const result = {
       'success' : true,
       'message' : 'Profmotion Updated Successfully.',
+      'data' : []
+    }
+    res.status(HttpStatus.OK).json(result);
+  }
+
+  @Patch('promotion-update-as-approved')
+  async promotionUpdateAsApproved(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() promotionStatusUpdateDto: PromotionStatusUpdateDto
+  )
+  {
+    const updateRequest = this.promotionMasterApiService.promotionUpdateAsApproved(promotionStatusUpdateDto);   
+    const result = {
+      'success' : true,
+      'message' : 'Promotion Approved Successfully.',
+      'data' : []
+    }
+    res.status(HttpStatus.OK).json(result);
+  }
+
+  @Patch('promotion-update-as-decline')
+  async promotionUpdateAsDecline(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() promotionStatusUpdateDto: PromotionStatusUpdateDto
+  )
+  {
+    const updateRequest = this.promotionMasterApiService.promotionUpdateAsDecline(promotionStatusUpdateDto);   
+    const result = {
+      'success' : true,
+      'message' : 'Promotion Declined Successfully.',
+      'data' : []
+    }
+    res.status(HttpStatus.OK).json(result);
+  }
+
+  @Patch('promotion-update-as-deactivate')
+  async promotionUpdateAsDeactivate(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() promotionStatusUpdateDto: PromotionStatusUpdateDto
+  )
+  {
+    const updateRequest = this.promotionMasterApiService.promotionUpdateAsDeactivate(promotionStatusUpdateDto);
+    const result = {
+      'success' : true,
+      'message' : 'Promotion Deactivated Successfully.',
       'data' : []
     }
     res.status(HttpStatus.OK).json(result);
