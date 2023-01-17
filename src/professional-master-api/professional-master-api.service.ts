@@ -142,13 +142,13 @@ export class ProfessionalMasterApiService {
           // to fetch Point
           .innerJoin('master_dep', 'DistributorPoint', '`Professional`.`dep_id` = `DistributorPoint`.`id`')
           // to fetch region | division
-          .innerJoin('master_dep_location_mapping', 'DivisionMapping', '`Professional`.`dep_id` = `DivisionMapping`.`dep_id` AND `DivisionMapping`.`location_type` = :location_type', { location_type: 18 })
+          .innerJoin('master_dep_location_mapping', 'DivisionMapping', '`Professional`.`dep_id` = `DivisionMapping`.`dep_id` AND `DivisionMapping`.`location_type` = :division_location_type', { division_location_type: 18 })
           .innerJoin('master_locations', 'DivisionInfo', '`DivisionMapping`.`location_id` = `DivisionInfo`.`id`')
           // to fetch area
-          .innerJoin('master_dep_location_mapping', 'AreaMapping', '`Professional`.`dep_id` = `AreaMapping`.`dep_id` AND `AreaMapping`.`location_type` = :location_type', { location_type: 19 })
+          .innerJoin('master_dep_location_mapping', 'AreaMapping', '`Professional`.`dep_id` = `AreaMapping`.`dep_id` AND `AreaMapping`.`location_type` = :area_location_type', { area_location_type: 19 })
           .innerJoin('master_locations', 'AreaInfo', '`AreaMapping`.`location_id` = `AreaInfo`.`id`')
           // to fetch territory
-          .innerJoin('master_dep_location_mapping', 'TerritoryMapping', '`Professional`.`dep_id` = `TerritoryMapping`.`dep_id` AND `TerritoryMapping`.`location_type` = :location_type', { location_type: 20 })
+          .innerJoin('master_dep_location_mapping', 'TerritoryMapping', '`Professional`.`dep_id` = `TerritoryMapping`.`dep_id` AND `TerritoryMapping`.`location_type` = :territory_location_type', { territory_location_type: 20 })
           .innerJoin('master_locations', 'TerritoryInfo', '`TerritoryMapping`.`location_id` = `TerritoryInfo`.`id`')
           // .where("Professional.status = :status", { status: 1 })
           // .andWhere("Professional.territory_id IN(:territory_ids)", { territory_ids: [1] })
@@ -221,13 +221,13 @@ export class ProfessionalMasterApiService {
             // to fetch Point
             .innerJoin('master_dep', 'DistributorPoint', '`Professional`.`dep_id` = `DistributorPoint`.`id`')
             // to fetch region | division
-            .innerJoin('master_dep_location_mapping', 'DivisionMapping', '`Professional`.`dep_id` = `DivisionMapping`.`dep_id` AND `DivisionMapping`.`location_type` = :location_type', { location_type: 18 })
+            .innerJoin('master_dep_location_mapping', 'DivisionMapping', '`Professional`.`dep_id` = `DivisionMapping`.`dep_id` AND `DivisionMapping`.`location_type` = :division_location_type', { division_location_type: 18 })
             .innerJoin('master_locations', 'DivisionInfo', '`DivisionMapping`.`location_id` = `DivisionInfo`.`id`')
             // to fetch area
-            .innerJoin('master_dep_location_mapping', 'AreaMapping', '`Professional`.`dep_id` = `AreaMapping`.`dep_id` AND `AreaMapping`.`location_type` = :location_type', { location_type: 19 })
+            .innerJoin('master_dep_location_mapping', 'AreaMapping', '`Professional`.`dep_id` = `AreaMapping`.`dep_id` AND `AreaMapping`.`location_type` = :area_location_type', { area_location_type: 19 })
             .innerJoin('master_locations', 'AreaInfo', '`AreaMapping`.`location_id` = `AreaInfo`.`id`')
             // to fetch territory
-            .innerJoin('master_dep_location_mapping', 'TerritoryMapping', '`Professional`.`dep_id` = `TerritoryMapping`.`dep_id` AND `TerritoryMapping`.`location_type` = :location_type', { location_type: 20 })
+            .innerJoin('master_dep_location_mapping', 'TerritoryMapping', '`Professional`.`dep_id` = `TerritoryMapping`.`dep_id` AND `TerritoryMapping`.`location_type` = :territory_location_type', { territory_location_type: 20 })
             .innerJoin('master_locations', 'TerritoryInfo', '`TerritoryMapping`.`location_id` = `TerritoryInfo`.`id`')
             .where("Professional.id = :professional_id", { professional_id: professional_id })
             .getRawMany();
@@ -318,13 +318,13 @@ export class ProfessionalMasterApiService {
             // to fetch Point
             .innerJoin('master_dep', 'DistributorPoint', '`Professional`.`dep_id` = `DistributorPoint`.`id`')
             // to fetch region | division
-            .innerJoin('master_dep_location_mapping', 'DivisionMapping', '`Professional`.`dep_id` = `DivisionMapping`.`dep_id` AND `DivisionMapping`.`location_type` = :location_type', { location_type: 18 })
+            .innerJoin('master_dep_location_mapping', 'DivisionMapping', '`Professional`.`dep_id` = `DivisionMapping`.`dep_id` AND `DivisionMapping`.`location_type` = :division_location_type', { division_location_type: 18 })
             .innerJoin('master_locations', 'DivisionInfo', '`DivisionMapping`.`location_id` = `DivisionInfo`.`id`')
             // to fetch area
-            .innerJoin('master_dep_location_mapping', 'AreaMapping', '`Professional`.`dep_id` = `AreaMapping`.`dep_id` AND `AreaMapping`.`location_type` = :location_type', { location_type: 19 })
+            .innerJoin('master_dep_location_mapping', 'AreaMapping', '`Professional`.`dep_id` = `AreaMapping`.`dep_id` AND `AreaMapping`.`location_type` = :area_location_type', { area_location_type: 19 })
             .innerJoin('master_locations', 'AreaInfo', '`AreaMapping`.`location_id` = `AreaInfo`.`id`')
             // to fetch territory
-            .innerJoin('master_dep_location_mapping', 'TerritoryMapping', '`Professional`.`dep_id` = `TerritoryMapping`.`dep_id` AND `TerritoryMapping`.`location_type` = :location_type', { location_type: 20 })
+            .innerJoin('master_dep_location_mapping', 'TerritoryMapping', '`Professional`.`dep_id` = `TerritoryMapping`.`dep_id` AND `TerritoryMapping`.`location_type` = :territory_location_type', { territory_location_type: 20 })
             .innerJoin('master_locations', 'TerritoryInfo', '`TerritoryMapping`.`location_id` = `TerritoryInfo`.`id`')
             .where("Professional.professional_id = :professional_id", { professional_id: professional_id })
             .getRawMany();
