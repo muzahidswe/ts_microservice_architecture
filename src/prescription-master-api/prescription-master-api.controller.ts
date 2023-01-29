@@ -28,7 +28,7 @@ export class PrescriptionMasterApiController {
   }
 
   @Get('by-professional-prescription-summary')
-   async byProfessionalPrescriptionSummary(
+  async byProfessionalPrescriptionSummary(
     @Req() req: Request,
     @Res() res: Response
     ) {
@@ -42,7 +42,7 @@ export class PrescriptionMasterApiController {
   }
  
   @Get('by-professional-prescription-image-list/:professional_id?/:limit?')
-   async byProfessionalPrescriptionImageList(
+  async byProfessionalPrescriptionImageList(
     @Param() params,
     @Req() req: Request,
     @Res() res: Response
