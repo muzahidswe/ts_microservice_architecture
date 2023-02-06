@@ -8,7 +8,7 @@ import { PromotionCategoryRepository } from 'src/database_table/repository/ms_pr
 @Injectable()
 export class PromotionMasterApiService {
   private readonly logger = new Logger(PromotionMasterApiService.name);
-  constructor(    
+  constructor(
     @InjectRepository(MasterPromotionRepository)
     @InjectRepository(PromotionCategoryRepository)
     private readonly masterPromotionRepository: MasterPromotionRepository,
@@ -43,7 +43,7 @@ export class PromotionMasterApiService {
     this.logger.log('Adding New Promotion');
     try{
       const promotionId = await this.preparePromotionId(Number(CreatePromotionMasterApiDto[0].promotion_category_id));
-      const apiData = {...CreatePromotionMasterApiDto};
+      const apiData = {...CreatePromotionMasterApiDto}; // all payload here.
       const insertData = {
         "promotion_id" : String(promotionId),
         "promotion_category_id" : apiData.promotion_category_id !== undefined ? Number(apiData.promotion_category_id) : null,
