@@ -9,7 +9,7 @@ const fs = require('fs');
 @Injectable()
 export class PrescriptionMasterApiService {
   private readonly logger = new Logger(PrescriptionMasterApiService.name);
-  constructor(    
+  constructor(
     @InjectRepository(PrescriptionImageDetailsRepository)
     @InjectRepository(MasterPrescriptionListRepository)
     private readonly prescriptionImageDetailsRepository: PrescriptionImageDetailsRepository,
@@ -30,7 +30,7 @@ export class PrescriptionMasterApiService {
       };
 
       const insertLog = await this.masterPrescriptionListRepository.insert(insertData);
-      const image_path = 'public/assets/images/prescription/';
+      const image_path = '../storage/uploads/assets/images/prescription/';
       const base64_image = await this.base64_to_image(apiData.prescription_image_data, image_path, insertLog.identifiers[0].id, apiData.created_by);
       
       return (base64_image == true && insertLog.identifiers[0].id > 0) ? true : false;

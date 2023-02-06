@@ -57,7 +57,7 @@ export class ProfessionalMasterApiService {
       try{
         const professionalId = await this.prepareProfessionalId(Number(createProfessionalMasterApiDto.category_id));
         const apiData = {...createProfessionalMasterApiDto};
-        const image_path = 'public/assets/images/professionals/';
+        const image_path = '../storage/uploads/assets/images/professionals/';
         const base64_image: Binary = await this.base64_to_image(apiData.image_data, image_path, professionalId);
         const insertData: object = {
           "professional_id" : String(professionalId),
@@ -380,7 +380,7 @@ export class ProfessionalMasterApiService {
       try{
         this.logger.log('Updating Professional Details');
         const apiData = updateProfessionalMasterApiDto[0];
-        const image_path = 'public/assets/images/professionals/';
+        const image_path = '../storage/uploads/assets/images/professionals/';
         const base64_image = await this.base64_to_image(apiData.image_data, image_path, apiData.professional_id);
         const updateProfessional = await this.masterProfessionalListRepository
           .createQueryBuilder()
