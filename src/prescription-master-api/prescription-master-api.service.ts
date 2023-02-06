@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable, Logger, NotFoundException} from 
 import { CreatePrescriptionMasterApiDto } from './dto/create-prescription-master-api.dto';
 import { UpdatePrescriptionMasterApiDto } from './dto/update-prescription-master-api.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GlobalService } from 'src/utils/global.service';
 import { PrescriptionImageDetailsRepository } from '../database_table/repository/ms_prescription_image_details.repository';
 import { MasterPrescriptionListRepository } from 'src/database_table/repository/master-prescription-list.repository';
 const fs = require('fs');
@@ -26,7 +25,7 @@ export class PrescriptionMasterApiService {
       
       const insertData = {
         "professional_id" : apiData.professional_id !== undefined ? Number(apiData.professional_id) : null,
-        "created_by" : GlobalService.userId !== undefined ? Number(GlobalService.userId) : null,
+        "created_by" : apiData.created_by !== undefined ? Number(apiData.created_by) : null,
         "prescription_image_count" : (apiData.prescription_image_data !== undefined && apiData.prescription_image_data.length > 0) ? apiData.prescription_image_data.length : 0
       };
 

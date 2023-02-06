@@ -12,7 +12,7 @@ export class PrescriptionMasterApiController {
 
   constructor(private readonly prescriptionMasterApiService: PrescriptionMasterApiService) { }
 
-  @Post('create-prescription')
+  @Post('create-prescriptionnnn')
   async create_prescription(
     @Req() req: Request,
     @Res() res: Response,

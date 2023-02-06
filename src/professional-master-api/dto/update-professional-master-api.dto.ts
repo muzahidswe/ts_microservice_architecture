@@ -17,4 +17,8 @@ export class UpdateProfessionalMasterApiDto extends PartialType(CreateProfession
 export class ProfessionalStatusUpdateDto{
     @IsNotEmpty()
     professional_ids: number[];
+
+    @IsNotEmpty()
+    @IsNumber()
+    updated_by: number;
 }

@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable, Logger, NotFoundException} from 
 import { CreatePromotionMasterApiDto } from './dto/create-promotion-master-api.dto';
 import { UpdatePromotionMasterApiDto, PromotionStatusUpdateDto } from './dto/update-promotion-master-api.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GlobalService } from 'src/utils/global.service';
 import { MasterPromotionRepository } from 'src/database_table/repository/master-promotion.repository';
 import { PromotionCategoryRepository } from 'src/database_table/repository/ms_promotion_category.repository';
 
@@ -271,7 +270,7 @@ export class PromotionMasterApiService {
           activation_status : 1,
           request_status : 1,
           activation_date : new Date(),
-          updated_by : GlobalService.userId,
+          updated_by : payload.updated_by !== undefined ? Number(payload.updated_by) : null
         })
         .andWhere("ms_promotion_list.id IN(:promotion_ids)", { promotion_ids : payload.promotion_ids })
         .andWhere("ms_promotion_list.activation_status IN(:activation_status)", { activation_status : [0, 2] })
@@ -297,7 +296,7 @@ export class PromotionMasterApiService {
           activation_status : 0,
           request_status : 0,
           activation_date : new Date(),
-          updated_by : GlobalService.userId,
+          updated_by : payload.updated_by !== undefined ? Number(payload.updated_by) : null
         })
         .andWhere("ms_promotion_list.id IN(:promotion_ids)", { promotion_ids : payload.promotion_ids })
         .andWhere("ms_promotion_list.activation_status IN(:activation_status)", { activation_status : [0] })
@@ -322,7 +321,7 @@ export class PromotionMasterApiService {
         .set({
           activation_status : 2,
           activation_date : new Date(),
-          updated_by : GlobalService.userId,
+          updated_by : payload.updated_by !== undefined ? Number(payload.updated_by) : null
         })
         .andWhere("ms_promotion_list.id IN(:promotion_ids)", { promotion_ids : payload.promotion_ids })
         .andWhere("ms_promotion_list.activation_status IN(:activation_status)", { activation_status : [1] })

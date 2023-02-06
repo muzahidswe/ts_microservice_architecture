@@ -12,4 +12,8 @@ export class UpdatePromotionMasterApiDto extends PartialType(CreatePromotionMast
 export class PromotionStatusUpdateDto{
     @IsNotEmpty()
     promotion_ids: number[];
+
+    @IsNotEmpty()
+    @IsNumber()
+    updated_by: number;
 }

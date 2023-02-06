@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable, Logger, NotFoundException} from 
 import { CreateProfessionalMasterApiDto, GetAllProfessionalFilterDto } from './dto/create-professional-master-api.dto';
 import { UpdateProfessionalMasterApiDto, ProfessionalStatusUpdateDto } from './dto/update-professional-master-api.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GlobalService } from 'src/utils/global.service';
 import { MasterProfessionalListRepository } from 'src/database_table/repository/master-professional-list.repository';
 import { ProfessionalCategoryRepository } from 'src/database_table/repository/ms_professional_category.repository';
 import { ProfessionalPresenceDetailsRepository } from 'src/database_table/repository/ms_professional_presence_details.repository';
@@ -86,7 +85,7 @@ export class ProfessionalMasterApiService {
           "comments" : apiData.comments !== undefined ? String(apiData.comments) : null,
           "activation_status" : 0,  // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
           "request_status" : 3,     // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
-          "created_by" : GlobalService.userId !== undefined ? Number(GlobalService.userId) : null,
+          "created_by" : apiData.created_by !== undefined ? Number(apiData.created_by) : null,
         };
 
         const insertLog = await this.masterProfessionalListRepository.insert(insertData);
@@ -450,7 +449,7 @@ export class ProfessionalMasterApiService {
             activation_status : 1,
             request_status : 1,
             activation_date : new Date(),
-            updated_by : GlobalService.userId,
+            updated_by : payload.updated_by !== undefined ? Number(payload.updated_by) : null
           })
           .andWhere("ms_professional_list.id IN(:professional_ids)", { professional_ids : payload.professional_ids })
           .andWhere("ms_professional_list.activation_status IN(:activation_status)", { activation_status : [0, 2] })
@@ -478,7 +477,7 @@ export class ProfessionalMasterApiService {
             activation_status : 0,
             request_status : 0,
             activation_date : new Date(),
-            updated_by : GlobalService.userId,
+            updated_by : payload.updated_by !== undefined ? Number(payload.updated_by) : null
           })
           .andWhere("ms_professional_list.id IN(:professional_ids)", { professional_ids : payload.professional_ids })
           .andWhere("ms_professional_list.activation_status IN(:activation_status)", { activation_status : [0] })
@@ -505,7 +504,7 @@ export class ProfessionalMasterApiService {
           .set({
             activation_status : 2,
             activation_date : new Date(),
-            updated_by : GlobalService.userId,
+            updated_by : payload.updated_by !== undefined ? Number(payload.updated_by) : null
           })
           .andWhere("ms_professional_list.id IN(:professional_ids)", { professional_ids : payload.professional_ids })
           .andWhere("ms_professional_list.activation_status IN(:activation_status)", { activation_status : [1] })
