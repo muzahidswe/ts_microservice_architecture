@@ -36,6 +36,7 @@ export class PrescriptionMasterApiService {
   
         resolve ((base64_image == true && insertLog.identifiers[0].id > 0) ? true : false);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -67,6 +68,7 @@ export class PrescriptionMasterApiService {
           }
           resolve (promotionInfo);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -98,6 +100,7 @@ export class PrescriptionMasterApiService {
           }
           resolve (prescriptionImageList);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });

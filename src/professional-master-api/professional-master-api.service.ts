@@ -45,6 +45,7 @@ export class ProfessionalMasterApiService {
           }
           resolve (category);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -103,6 +104,7 @@ export class ProfessionalMasterApiService {
         
         resolve ((insertLog.identifiers[0].id > 0) ? true : false);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -171,6 +173,7 @@ export class ProfessionalMasterApiService {
           }        
           resolve (professionalList);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -270,6 +273,7 @@ export class ProfessionalMasterApiService {
         
         resolve (professionalDetails);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -369,6 +373,7 @@ export class ProfessionalMasterApiService {
             
         resolve (professionalDetails);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -429,6 +434,7 @@ export class ProfessionalMasterApiService {
 
         resolve ((updateProfessional.affected > 0) ? true : false);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -457,6 +463,7 @@ export class ProfessionalMasterApiService {
 
         resolve((updateProfessional.affected > 0) ? true : false);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -485,6 +492,7 @@ export class ProfessionalMasterApiService {
 
         resolve((updateProfessional.affected > 0) ? true : false);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -512,6 +520,7 @@ export class ProfessionalMasterApiService {
 
         resolve((updateProfessional.affected > 0) ? true : false);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -529,7 +538,8 @@ export class ProfessionalMasterApiService {
         const professionalList: any = await this.masterProfessionalListRepository.find();
         const professional_id = professionalCategory.id_creation + await this.addingExtraZeros(String(professionalList.length + 1), 5);
         resolve (professional_id);
-      } catch (error) {
+      } catch (errror) {
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });

@@ -36,6 +36,7 @@ export class PromotionMasterApiService {
           }
           resolve (category);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -64,6 +65,7 @@ export class PromotionMasterApiService {
         const insertLog = await this.masterPromotionRepository.insert(insertData);
         resolve ((insertLog.identifiers[0].id > 0) ? true : false);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -109,6 +111,7 @@ export class PromotionMasterApiService {
           }
           resolve (promotionInfo);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -155,6 +158,7 @@ export class PromotionMasterApiService {
         }
         resolve (promotionInfo);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -209,6 +213,7 @@ export class PromotionMasterApiService {
         }      
         return promotionInfo;
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -226,6 +231,7 @@ export class PromotionMasterApiService {
       const promotion_id = promotionCategory.id_creation + await this.addingExtraZeros(String(promotionList.length + 1), 5);
       return promotion_id;
     } catch (error) {
+      console.log(error);
       // throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
       throw new HttpException({status: HttpStatus.FORBIDDEN, error: 'Forbidden'}, HttpStatus.FORBIDDEN);
     }
@@ -262,6 +268,7 @@ export class PromotionMasterApiService {
           
           resolve ((updatePromotion.affected > 0) ? true : false);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -290,6 +297,7 @@ export class PromotionMasterApiService {
 
         resolve ((updateProfessional.affected > 0) ? true : false);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -318,6 +326,7 @@ export class PromotionMasterApiService {
 
         resolve ((updateProfessional.affected > 0) ? true : false);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
@@ -345,6 +354,7 @@ export class PromotionMasterApiService {
 
         resolve ((updateProfessional.affected > 0) ? true : false);
       } catch(errror){
+        console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
       }
     });
