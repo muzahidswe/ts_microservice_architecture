@@ -5,7 +5,7 @@ import { UpdatePromotionMasterApiDto, PromotionStatusUpdateDto } from './dto/upd
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-@Controller('Promotion-master-api')
+@Controller('promotion-master-api')
 @UseGuards(JwtAuthGuard)
 @ApiTags('Promotion Master Api')
 export class PromotionMasterApiController {

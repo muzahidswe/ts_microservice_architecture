@@ -5,7 +5,7 @@ import { UpdatePrescriptionMasterApiDto } from './dto/update-prescription-master
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ApiTags, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-@Controller('Prescription-master-api')
+@Controller('prescription-master-api')
 @UseGuards(JwtAuthGuard)
 @ApiTags('Prescription Master Api')
 export class PrescriptionMasterApiController {
