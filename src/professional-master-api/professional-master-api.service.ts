@@ -50,14 +50,13 @@ export class ProfessionalMasterApiService {
     });
   }
 
-  async create_professional(createProfessionalMasterApiDto: CreateProfessionalMasterApiDto) : Promise <any>
-  {
+  async create_professional(createProfessionalMasterApiDto: CreateProfessionalMasterApiDto) : Promise <any>{
     return new Promise(async (resolve, reject) => {
       this.logger.log('Adding New Professionals');
       try{
         const professionalId = await this.prepareProfessionalId(Number(createProfessionalMasterApiDto.category_id));
         const apiData = {...createProfessionalMasterApiDto};
-        const image_path = '../storage/uploads/assets/images/professionals/';
+        const image_path = 'storage/uploads/assets/images/professionals/';
         const base64_image: Binary = await this.base64_to_image(apiData.image_data, image_path, professionalId);
         const insertData: object = {
           "professional_id" : String(professionalId),
@@ -380,7 +379,7 @@ export class ProfessionalMasterApiService {
       try{
         this.logger.log('Updating Professional Details');
         const apiData = updateProfessionalMasterApiDto[0];
-        const image_path = '../storage/uploads/assets/images/professionals/';
+        const image_path = 'storage/uploads/assets/images/professionals/';
         const base64_image = await this.base64_to_image(apiData.image_data, image_path, apiData.professional_id);
         const updateProfessional = await this.masterProfessionalListRepository
           .createQueryBuilder()
@@ -545,14 +544,16 @@ export class ProfessionalMasterApiService {
     }
   }
 
-  async base64_to_image (base64Data: string, image_path: string, image_name: string): Promise<any> {
+  async base64_to_image(base64Data: string, image_path: string, image_name: string): Promise<any> 
+  {
     return new Promise(async (resolve, reject) => {
       try {
         base64Data = base64Data.replace(/^data:image\/[a-z]+;base64,/, "");
-        if (!fs.existsSync(image_path)){
-          fs.mkdirSync(image_path, { recursive: true });
+        const temp_path = '../' + image_path;
+        if (!fs.existsSync(temp_path)){
+          fs.mkdirSync(temp_path, { recursive: true });
         }
-        const image_path_and_name = image_path + image_name + '.jpg';
+        const image_path_and_name = temp_path + image_name + '.jpg';
         require('fs').writeFile(image_path_and_name, base64Data, 'base64', function(err) {
           if(err == 'null') return true;
           else return err;
