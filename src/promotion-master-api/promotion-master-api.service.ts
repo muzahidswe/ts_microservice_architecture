@@ -46,7 +46,7 @@ export class PromotionMasterApiService {
     return new Promise(async (resolve, reject) => {
       this.logger.log('Adding New Promotion');
       try{
-        const promotionId = await this.preparePromotionId(Number(CreatePromotionMasterApiDto[0].promotion_category_id));
+        const promotionId = await this.preparePromotionId(Number(CreatePromotionMasterApiDto.promotion_category_id));
         const apiData = {...CreatePromotionMasterApiDto}; // all payload here.
         const insertData = {
           "promotion_id" : String(promotionId),
@@ -57,7 +57,7 @@ export class PromotionMasterApiService {
           "usable_value" : apiData.usable_value !== undefined ? Number(apiData.usable_value) : null,
           "comments" : apiData.comments !== undefined ? String(apiData.comments) : null,
           "activation_status" : 0, // activation_status 0 = Inactive Promotion; 1 = Active Promotion; 2 = Deactivate Promotion
-          "request_status" : 3, // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+          "request_status" : 3,    // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
           "request_date": new Date(),
           "created_by" : apiData.created_by !== undefined ? Number(apiData.created_by) : null,
         };
