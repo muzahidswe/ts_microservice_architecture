@@ -20,7 +20,7 @@ export class ProfessionalMasterApiController {
     @Body() createProfessionalMasterApiDto: CreateProfessionalMasterApiDto
   )
   {
-    const categoryList: any = this.professionalMasterApiService.create_professional(createProfessionalMasterApiDto);
+    const categoryList: any = await this.professionalMasterApiService.create_professional(createProfessionalMasterApiDto);
     const result: object = {
       'success' : categoryList,
       'message' : categoryList ? 'Professional Added Successfully.' :  'Professional Added Failed.',
@@ -36,9 +36,9 @@ export class ProfessionalMasterApiController {
     ) {
     const categoryList: any[] = await this.professionalMasterApiService.professionalCategoryList();
     const result: object = {
-      'success' : true,
+      'success' : (categoryList.length > 0) ? true : false,
       'message' : (categoryList.length > 0) ? 'Category List Found Successfully.' : 'Category List Empty',
-      'data' : (categoryList.length > 0) ? categoryList : []
+      'data' : categoryList
     }
     res.status(HttpStatus.OK).json(result);
   }
@@ -51,9 +51,9 @@ export class ProfessionalMasterApiController {
     ) {
     const professionalList: any[] = await this.professionalMasterApiService.professionalList(getAllProfessionalFilterDto);
     const result: object = {
-      'success' : true,
+      'success' : (professionalList.length > 0) ? true : false,
       'message' : (professionalList.length > 0) ? 'Professional List Found Successfully.' : 'Professional List Empty.',
-      'data' : (professionalList.length > 0) ? professionalList : []
+      'data' : []
     }
     res.status(HttpStatus.OK).json(result);
   }
@@ -66,9 +66,9 @@ export class ProfessionalMasterApiController {
     ) {    
     const professionalDetailsById: any[] = await this.professionalMasterApiService.professionalDetailsById(professional_id);    
     const result: object = {
-      'success' : true,
+      'success' : professionalDetailsById ? true : false,
       'message' : professionalDetailsById ? 'Professional Details Found Successfully.' : 'Professional Details Not Found.',
-      'data' : professionalDetailsById ? professionalDetailsById : {}
+      'data' : professionalDetailsById
     }
     res.status(HttpStatus.OK).json(result);
   }
@@ -81,7 +81,7 @@ export class ProfessionalMasterApiController {
     ) {    
     const professionalDetailsById: any[] = await this.professionalMasterApiService.professionalDetailsByProfessionalId(professional_id);    
     const result: object = {
-      'success' : true,
+      'success' : professionalDetailsById ? true : false,
       'message' : professionalDetailsById ? 'Professional Details Found Successfully.' : 'Professional Details Not Found.',
       'data' : professionalDetailsById ? professionalDetailsById : {}
     }
@@ -94,10 +94,10 @@ export class ProfessionalMasterApiController {
     @Req() req: Request,
     @Res() res: Response,
     @Body() updateProfessionalMasterApiDto: UpdateProfessionalMasterApiDto[]) {
-    const updatePromotion: any = this.professionalMasterApiService.updateProfessional(id, updateProfessionalMasterApiDto);   
+    const updateProfessional: any = await this.professionalMasterApiService.updateProfessional(id, updateProfessionalMasterApiDto);   
     const result: object = {
-      'success' : true,
-      'message' : updatePromotion ? 'Professional Updated Successfully.' : 'Professional Updated Failed.',
+      'success' : updateProfessional,
+      'message' : updateProfessional ? 'Professional Updated Successfully.' : 'Professional Updated Failed.',
       'data' : []
     }
     res.status(HttpStatus.OK).json(result);
@@ -110,9 +110,9 @@ export class ProfessionalMasterApiController {
     @Body() professionalStatusUpdateDto: ProfessionalStatusUpdateDto
   )
   {
-    const updateRequest: any = this.professionalMasterApiService.professionalUpdateAsApproved(professionalStatusUpdateDto);   
+    const updateRequest: any = await this.professionalMasterApiService.professionalUpdateAsApproved(professionalStatusUpdateDto);   
     const result: object = {
-      'success' : true,
+      'success' : updateRequest,
       'message' : updateRequest ? 'Professional Approved Successfully.' : 'Professional Approved Failed.',
       'data' : []
     }
@@ -126,9 +126,9 @@ export class ProfessionalMasterApiController {
     @Body() professionalStatusUpdateDto: ProfessionalStatusUpdateDto
   )
   {
-    const updateRequest: any = this.professionalMasterApiService.professionalUpdateAsDecline(professionalStatusUpdateDto);   
+    const updateRequest: any = await this.professionalMasterApiService.professionalUpdateAsDecline(professionalStatusUpdateDto);   
     const result: object = {
-      'success' : true,
+      'success' : updateRequest,
       'message' : updateRequest ? 'Professional Declined Successfully.' : 'Professional Declined Failed.',
       'data' : []
     }
@@ -142,9 +142,9 @@ export class ProfessionalMasterApiController {
     @Body() professionalStatusUpdateDto: ProfessionalStatusUpdateDto
   )
   {
-    const updateRequest: any = this.professionalMasterApiService.professionalUpdateAsDeactivate(professionalStatusUpdateDto);
+    const updateRequest: any = await this.professionalMasterApiService.professionalUpdateAsDeactivate(professionalStatusUpdateDto);
     const result: object = {
-      'success' : true,
+      'success' : updateRequest,
       'message' : updateRequest ? 'Professional Deactivated Successfully.' : 'Professional Deactivated Failed.',
       'data' : []
     }

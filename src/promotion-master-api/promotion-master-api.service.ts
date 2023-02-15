@@ -168,50 +168,54 @@ export class PromotionMasterApiService {
     return new Promise(async (resolve, reject) => {
       this.logger.log('Returning By Professional Promotion List');
       try{
-        const promotionInfo = await this.masterPromotionRepository
-          .createQueryBuilder('Promotion')
-          .select([
-            'Promotion.id AS id',
-            'Promotion.promotion_id AS promotion_id',
-            'professionalInfo.professional_id AS professional_id',
-            'Promotion.promotion_category_id AS promotion_category_id',
-            'PromotionCategory.name AS promotion_category_name',
-            'professionalInfo.name AS professional_name',
-            'professionalInfo.designation AS designation',
-            'professionalInfo.department AS department',
-            'professionalInfo.organization AS organization',
-            'professionalInfo.mobile_number AS mobile_number',
-            'professionalInfo.contract_value AS contract_value',
-            'Promotion.promotion_value AS promotion_value',
-            'Promotion.promotion_description AS promotion_description',
-            'Promotion.comments AS promotion_comment',
-            'Promotion.created_by AS issued_by',
-            'DATE_FORMAT(Promotion.activation_date, "%Y-%m-%d") as activation_date',
-            'DATE_FORMAT(Promotion.request_date, "%Y-%m-%d") as request_date'
-          ])
-          // activation_status 0 = Inactive Promotion; 1 = Active Promotion; 2 = Deactivate Promotion
-          .addSelect(`CASE
-              WHEN Promotion.activation_status = 0 THEN 'Inactive'
-              WHEN Promotion.activation_status = 1 THEN 'Active'
-              WHEN Promotion.activation_status = 2 THEN 'Deactivate'
-            END`, 'activation_status')
-          // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
-          .addSelect(`CASE
-              WHEN Promotion.request_status = 0 THEN 'Decline'
-              WHEN Promotion.request_status = 1 THEN 'Approved'
-              WHEN Promotion.request_status = 2 THEN 'Edit'
-              WHEN Promotion.request_status = 3 THEN 'New'
-            END`, 'request_status')
-          .innerJoin('ms_professional_list', 'professionalInfo', '`professionalInfo`.`id` = `Promotion`.`professional_id`')
-          .innerJoin('ms_promotion_category', 'PromotionCategory', '`Promotion`.`promotion_category_id` = `PromotionCategory`.`id`')
-          // .where("Promotion.activation_status = :activation_status", { activation_status: 1 })
-          .where("Promotion.id = :promotion_id", { promotion_id: promotion_id })
-          .getRawMany();
+        if(promotion_id){
+          const promotionInfo = await this.masterPromotionRepository
+            .createQueryBuilder('Promotion')
+            .select([
+              'Promotion.id AS id',
+              'Promotion.promotion_id AS promotion_id',
+              'professionalInfo.professional_id AS professional_id',
+              'Promotion.promotion_category_id AS promotion_category_id',
+              'PromotionCategory.name AS promotion_category_name',
+              'professionalInfo.name AS professional_name',
+              'professionalInfo.designation AS designation',
+              'professionalInfo.department AS department',
+              'professionalInfo.organization AS organization',
+              'professionalInfo.mobile_number AS mobile_number',
+              'professionalInfo.contract_value AS contract_value',
+              'Promotion.promotion_value AS promotion_value',
+              'Promotion.promotion_description AS promotion_description',
+              'Promotion.comments AS promotion_comment',
+              'Promotion.created_by AS issued_by',
+              'DATE_FORMAT(Promotion.activation_date, "%Y-%m-%d") as activation_date',
+              'DATE_FORMAT(Promotion.request_date, "%Y-%m-%d") as request_date'
+            ])
+            // activation_status 0 = Inactive Promotion; 1 = Active Promotion; 2 = Deactivate Promotion
+            .addSelect(`CASE
+                WHEN Promotion.activation_status = 0 THEN 'Inactive'
+                WHEN Promotion.activation_status = 1 THEN 'Active'
+                WHEN Promotion.activation_status = 2 THEN 'Deactivate'
+              END`, 'activation_status')
+            // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+            .addSelect(`CASE
+                WHEN Promotion.request_status = 0 THEN 'Decline'
+                WHEN Promotion.request_status = 1 THEN 'Approved'
+                WHEN Promotion.request_status = 2 THEN 'Edit'
+                WHEN Promotion.request_status = 3 THEN 'New'
+              END`, 'request_status')
+            .innerJoin('ms_professional_list', 'professionalInfo', '`professionalInfo`.`id` = `Promotion`.`professional_id`')
+            .innerJoin('ms_promotion_category', 'PromotionCategory', '`Promotion`.`promotion_category_id` = `PromotionCategory`.`id`')
+            // .where("Promotion.activation_status = :activation_status", { activation_status: 1 })
+            .where("Promotion.id = :promotion_id", { promotion_id: promotion_id })
+            .getRawMany();
 
-        if (!promotionInfo) {
-          throw new NotFoundException('Promotion List not found.');
-        }      
-        return promotionInfo;
+          if (!promotionInfo) {
+            throw new NotFoundException('Promotion List not found.');
+          }
+          resolve (promotionInfo);
+        } else {
+          resolve ([]);
+        }
       } catch(errror){
         console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
@@ -251,22 +255,26 @@ export class PromotionMasterApiService {
     return new Promise(async (resolve, reject) => {
       this.logger.log('Updating Promotion Details');
       try{
-        const updatePromotion = await this.masterPromotionRepository
-          .createQueryBuilder()
-          .update('ms_promotion_list')
-          .set({
-            promotion_category_id: updatePromotionMasterApiDto[0].promotion_category_id,
-            professional_id: updatePromotionMasterApiDto[0].professional_id,
-            promotion_description: updatePromotionMasterApiDto[0].promotion_description,
-            promotion_value: updatePromotionMasterApiDto[0].promotion_value,
-            usable_value: updatePromotionMasterApiDto[0].usable_value,
-            comments: updatePromotionMasterApiDto[0].comments,
-            updated_by: updatePromotionMasterApiDto[0].updated_by
-          })
-          .where("id = :id", { id: id })
-          .execute();
-          
-          resolve ((updatePromotion.affected > 0) ? true : false);
+        if(updatePromotionMasterApiDto[0] && updatePromotionMasterApiDto[0].promotion_category_id != undefined){
+          const updatePromotion = await this.masterPromotionRepository
+            .createQueryBuilder()
+            .update('ms_promotion_list')
+            .set({
+              promotion_category_id: updatePromotionMasterApiDto[0].promotion_category_id,
+              professional_id: updatePromotionMasterApiDto[0].professional_id,
+              promotion_description: updatePromotionMasterApiDto[0].promotion_description,
+              promotion_value: updatePromotionMasterApiDto[0].promotion_value,
+              usable_value: updatePromotionMasterApiDto[0].usable_value,
+              comments: updatePromotionMasterApiDto[0].comments,
+              updated_by: updatePromotionMasterApiDto[0].updated_by
+            })
+            .where("id = :id", { id: id })
+            .execute();
+            
+            resolve ((updatePromotion.affected > 0) ? true : false);
+          } else {
+            resolve (false);
+          }
       } catch(errror){
         console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
@@ -281,21 +289,25 @@ export class PromotionMasterApiService {
       // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
       try{
         const payload = { ... promotionStatusUpdateDto};
-        const updateProfessional = await this.masterPromotionRepository
-          .createQueryBuilder()
-          .update('ms_promotion_list')
-          .set({
-            activation_status : 1,
-            request_status : 1,
-            activation_date : new Date(),
-            updated_by : payload.updated_by !== undefined ? Number(payload.updated_by) : null
-          })
-          .andWhere("ms_promotion_list.id IN(:promotion_ids)", { promotion_ids : payload.promotion_ids })
-          .andWhere("ms_promotion_list.activation_status IN(:activation_status)", { activation_status : [0, 2] })
-          // .andWhere("ms_promotion_list.request_status IN(:activation_status)", { activation_status : [0, 1, 2, 3] })
-          .execute();
+        if(payload.promotion_ids.length != 0){
+          const updateProfessional = await this.masterPromotionRepository
+            .createQueryBuilder()
+            .update('ms_promotion_list')
+            .set({
+              activation_status : 1,
+              request_status : 1,
+              activation_date : new Date(),
+              updated_by : payload.updated_by !== undefined ? Number(payload.updated_by) : null
+            })
+            .andWhere("ms_promotion_list.id IN(:promotion_ids)", { promotion_ids : payload.promotion_ids })
+            .andWhere("ms_promotion_list.activation_status IN(:activation_status)", { activation_status : [0, 2] })
+            // .andWhere("ms_promotion_list.request_status IN(:activation_status)", { activation_status : [0, 1, 2, 3] })
+            .execute();
 
-        resolve ((updateProfessional.affected > 0) ? true : false);
+          resolve ((updateProfessional.affected > 0) ? true : false);
+        } else {
+          resolve (false);
+        }
       } catch(errror){
         console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
@@ -310,21 +322,25 @@ export class PromotionMasterApiService {
       // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
       try{
         const payload = { ... promotionStatusUpdateDto};
-        const updateProfessional = await this.masterPromotionRepository
-          .createQueryBuilder()
-          .update('ms_promotion_list')
-          .set({
-            activation_status : 0,
-            request_status : 0,
-            activation_date : new Date(),
-            updated_by : payload.updated_by !== undefined ? Number(payload.updated_by) : null
-          })
-          .andWhere("ms_promotion_list.id IN(:promotion_ids)", { promotion_ids : payload.promotion_ids })
-          .andWhere("ms_promotion_list.activation_status IN(:activation_status)", { activation_status : [0] })
-          // .andWhere("ms_promotion_list.request_status IN(:activation_status)", { activation_status : [2, 3] })
-          .execute();
+        if(payload.promotion_ids.length != 0){
+          const updateProfessional = await this.masterPromotionRepository
+            .createQueryBuilder()
+            .update('ms_promotion_list')
+            .set({
+              activation_status : 0,
+              request_status : 0,
+              activation_date : new Date(),
+              updated_by : payload.updated_by !== undefined ? Number(payload.updated_by) : null
+            })
+            .andWhere("ms_promotion_list.id IN(:promotion_ids)", { promotion_ids : payload.promotion_ids })
+            .andWhere("ms_promotion_list.activation_status IN(:activation_status)", { activation_status : [0] })
+            // .andWhere("ms_promotion_list.request_status IN(:activation_status)", { activation_status : [2, 3] })
+            .execute();
 
-        resolve ((updateProfessional.affected > 0) ? true : false);
+          resolve ((updateProfessional.affected > 0) ? true : false);
+        } else {
+          resolve (false);
+        }
       } catch(errror){
         console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
@@ -339,20 +355,23 @@ export class PromotionMasterApiService {
       // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
       try{
         const payload = { ... promotionStatusUpdateDto};
-        const updateProfessional = await this.masterPromotionRepository
-          .createQueryBuilder()
-          .update('ms_promotion_list')
-          .set({
-            activation_status : 2,
-            activation_date : new Date(),
-            updated_by : payload.updated_by !== undefined ? Number(payload.updated_by) : null
-          })
-          .andWhere("ms_promotion_list.id IN(:promotion_ids)", { promotion_ids : payload.promotion_ids })
-          .andWhere("ms_promotion_list.activation_status IN(:activation_status)", { activation_status : [1] })
-          // .andWhere("ms_promotion_list.request_status IN(:activation_status)", { activation_status : [1] })
-          .execute();
-
-        resolve ((updateProfessional.affected > 0) ? true : false);
+        if(payload.promotion_ids.length != 0){
+          const updateProfessional = await this.masterPromotionRepository
+            .createQueryBuilder()
+            .update('ms_promotion_list')
+            .set({
+              activation_status : 2,
+              activation_date : new Date(),
+              updated_by : payload.updated_by !== undefined ? Number(payload.updated_by) : null
+            })
+            .andWhere("ms_promotion_list.id IN(:promotion_ids)", { promotion_ids : payload.promotion_ids })
+            .andWhere("ms_promotion_list.activation_status IN(:activation_status)", { activation_status : [1] })
+            // .andWhere("ms_promotion_list.request_status IN(:activation_status)", { activation_status : [1] })
+            .execute();
+          resolve ((updateProfessional.affected > 0) ? true : false);
+        } else {
+          resolve (false);
+        }
       } catch(errror){
         console.log(errror);
         reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));

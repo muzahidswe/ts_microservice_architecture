@@ -19,9 +19,9 @@ export class PromotionMasterApiController {
     @Body() createPromotionMasterApiDto: CreatePromotionMasterApiDto
   )
   {
-    const promotionCreate = this.promotionMasterApiService.create_promotion(createPromotionMasterApiDto);
+    const promotionCreate = await this.promotionMasterApiService.create_promotion(createPromotionMasterApiDto);
     const result = {
-      'success' : true,
+      'success' : promotionCreate,
       'message' : promotionCreate ? 'Promotion Added Successfully.' : 'Promotion Added Failed.',
       'data' : []
     }
@@ -29,28 +29,28 @@ export class PromotionMasterApiController {
   }
 
   @Get('promotion-category-list')
-   async promotionCategoryList(
+  async promotionCategoryList(
     @Req() req: Request,
     @Res() res: Response
     ) {
     const prmotionCategoryList = await this.promotionMasterApiService.promotionCategoryList();
     const result = {
-      'success' : true,
-      'message' : 'Promotion Category list Found Successfully.',
+      'success' : (prmotionCategoryList.length > 0) ? true : false,
+      'message' : (prmotionCategoryList.length > 0) ? 'Promotion Category list Found Successfully.' : 'Promotion Category List Empty.',
       'data' : prmotionCategoryList
     }
     res.status(HttpStatus.OK).json(result);
   }
 
   @Get('by-professional-promotion-summary')
-   async byProfessionalPromotionSummary(
+  async byProfessionalPromotionSummary(
     @Req() req: Request,
     @Res() res: Response
     ) {
     const byProfessionalPromotionSummary = await this.promotionMasterApiService.byProfessionalPromotionSummary();
     const result = {
-      'success' : true,
-      'message' : 'Promotion List Found Successfully.',
+      'success' : (byProfessionalPromotionSummary.length > 0) ? true : false,
+      'message' : (byProfessionalPromotionSummary.length > 0) ? 'Promotion List Found Successfully.' : 'Promotion List Not Found.',
       'data' : byProfessionalPromotionSummary
     }
     res.status(HttpStatus.OK).json(result);
@@ -64,8 +64,8 @@ export class PromotionMasterApiController {
     ) {    
     const byProfessionalPromotionList = await this.promotionMasterApiService.byProfessionalPromotionList(params);    
     const result = {
-      'success' : true,
-      'message' : 'Professional Details Found Successfully.',
+      'success' : (byProfessionalPromotionList.length > 0) ? true : false,
+      'message' : (byProfessionalPromotionList.length > 0) ? 'Professional Details Found Successfully.' : 'Professional Details Not Found.',
       'data' : byProfessionalPromotionList
     }
     res.status(HttpStatus.OK).json(result);
@@ -79,8 +79,8 @@ export class PromotionMasterApiController {
     ) {    
     const professionalDetailsById = await this.promotionMasterApiService.promotionDetailsById(promotion_id);    
     const result = {
-      'success' : true,
-      'message' : 'Professional Details Found Successfully.',
+      'success' : (professionalDetailsById.length > 0) ? true: false,
+      'message' : (professionalDetailsById.length > 0) ? 'Professional Details Found Successfully.' : 'Professional Details Not Found.',
       'data' : professionalDetailsById
     }
     res.status(HttpStatus.OK).json(result);
@@ -92,10 +92,10 @@ export class PromotionMasterApiController {
     @Req() req: Request,
     @Res() res: Response,
     @Body() updatePromotionMasterApiDto: UpdatePromotionMasterApiDto[]) {
-    const updatePromotion = this.promotionMasterApiService.updatePromotion(id, updatePromotionMasterApiDto);   
+    const updatePromotion = await this.promotionMasterApiService.updatePromotion(id, updatePromotionMasterApiDto);   
     const result = {
-      'success' : true,
-      'message' : 'Profmotion Updated Successfully.',
+      'success' : updatePromotion,
+      'message' : updatePromotion ? 'Profmotion Updated Successfully.' : 'Profmotion Updated Failed!',
       'data' : []
     }
     res.status(HttpStatus.OK).json(result);
@@ -108,10 +108,10 @@ export class PromotionMasterApiController {
     @Body() promotionStatusUpdateDto: PromotionStatusUpdateDto
   )
   {
-    const updateRequest = this.promotionMasterApiService.promotionUpdateAsApproved(promotionStatusUpdateDto);   
+    const updateRequest = await this.promotionMasterApiService.promotionUpdateAsApproved(promotionStatusUpdateDto);   
     const result = {
-      'success' : true,
-      'message' : 'Promotion Approved Successfully.',
+      'success' : updateRequest,
+      'message' : updateRequest ? 'Promotion Approved Successfully.' : 'Promotion Approved Failed',
       'data' : []
     }
     res.status(HttpStatus.OK).json(result);
@@ -124,10 +124,10 @@ export class PromotionMasterApiController {
     @Body() promotionStatusUpdateDto: PromotionStatusUpdateDto
   )
   {
-    const updateRequest = this.promotionMasterApiService.promotionUpdateAsDecline(promotionStatusUpdateDto);   
+    const updateRequest = await this.promotionMasterApiService.promotionUpdateAsDecline(promotionStatusUpdateDto);   
     const result = {
-      'success' : true,
-      'message' : 'Promotion Declined Successfully.',
+      'success' : updateRequest,
+      'message' : updateRequest ? 'Promotion Declined Successfully.' : 'Promotion Declined Failed!',
       'data' : []
     }
     res.status(HttpStatus.OK).json(result);
@@ -140,15 +140,14 @@ export class PromotionMasterApiController {
     @Body() promotionStatusUpdateDto: PromotionStatusUpdateDto
   )
   {
-    const updateRequest = this.promotionMasterApiService.promotionUpdateAsDeactivate(promotionStatusUpdateDto);
+    const updateRequest = await this.promotionMasterApiService.promotionUpdateAsDeactivate(promotionStatusUpdateDto);
     const result = {
-      'success' : true,
-      'message' : 'Promotion Deactivated Successfully.',
+      'success' : updateRequest,
+      'message' : updateRequest ? 'Promotion Deactivated Successfully.' : 'Promotion Deactivated Failed!',
       'data' : []
     }
     res.status(HttpStatus.OK).json(result);
   }
-
 }
 function Query() {
   throw new Error('Function not implemented.');
