@@ -3,9 +3,9 @@ import { IsBoolean,IsISO8601, IsDate, IsDateString, IsDecimal, IsNotEmpty, isArr
 
 export class CreatePromotionMasterApiDto {
 
-    // @IsNotEmpty()
-    // @IsString()
-    // professional_id: string;
+    @IsNotEmpty()
+    @IsString()
+    promotion_id: string;
     
     @IsNotEmpty()
     @IsNumber()
@@ -15,6 +15,14 @@ export class CreatePromotionMasterApiDto {
     @IsNumber()
     professional_id: number;
 
+    @IsNotEmpty()
+    @IsNumber()
+    dep_id: number;
+
+    @IsNotEmpty()
+    @IsNumber()
+    ff_id: number;
+    
     @IsNotEmpty()
     @IsString()
     promotion_description: string;

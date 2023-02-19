@@ -16,13 +16,13 @@ export class PromotionMasterApiController {
   async create_promotion(
     @Req() req: Request,
     @Res() res: Response,
-    @Body() createPromotionMasterApiDto: CreatePromotionMasterApiDto
+    @Body() createPromotionMasterApiDto: CreatePromotionMasterApiDto[]
   )
   {
     const promotionCreate = await this.promotionMasterApiService.create_promotion(createPromotionMasterApiDto);
     const result = {
-      'success' : promotionCreate,
-      'message' : promotionCreate ? 'Promotion Added Successfully.' : 'Promotion Added Failed.',
+      'success' : promotionCreate.success,
+      'message' : promotionCreate.msg,
       'data' : []
     }
     res.status(HttpStatus.OK).json(result);
@@ -32,7 +32,8 @@ export class PromotionMasterApiController {
   async promotionCategoryList(
     @Req() req: Request,
     @Res() res: Response
-    ) {
+  )
+  {
     const prmotionCategoryList = await this.promotionMasterApiService.promotionCategoryList();
     const result = {
       'success' : (prmotionCategoryList.length > 0) ? true : false,
@@ -46,7 +47,8 @@ export class PromotionMasterApiController {
   async byProfessionalPromotionSummary(
     @Req() req: Request,
     @Res() res: Response
-    ) {
+  ) 
+  {
     const byProfessionalPromotionSummary = await this.promotionMasterApiService.byProfessionalPromotionSummary();
     const result = {
       'success' : (byProfessionalPromotionSummary.length > 0) ? true : false,
@@ -61,7 +63,8 @@ export class PromotionMasterApiController {
     @Param() params,
     @Req() req: Request,
     @Res() res: Response
-    ) {    
+  )
+  {    
     const byProfessionalPromotionList = await this.promotionMasterApiService.byProfessionalPromotionList(params);    
     const result = {
       'success' : (byProfessionalPromotionList.length > 0) ? true : false,
@@ -76,7 +79,8 @@ export class PromotionMasterApiController {
     @Param('promotion_id') promotion_id: number,
     @Req() req: Request,
     @Res() res: Response
-    ) {    
+  )
+  {    
     const professionalDetailsById = await this.promotionMasterApiService.promotionDetailsById(promotion_id);    
     const result = {
       'success' : (professionalDetailsById.length > 0) ? true: false,
@@ -91,7 +95,9 @@ export class PromotionMasterApiController {
     @Param('id') id: number,
     @Req() req: Request,
     @Res() res: Response,
-    @Body() updatePromotionMasterApiDto: UpdatePromotionMasterApiDto[]) {
+    @Body() updatePromotionMasterApiDto: UpdatePromotionMasterApiDto[]
+  )
+  {
     const updatePromotion = await this.promotionMasterApiService.updatePromotion(id, updatePromotionMasterApiDto);   
     const result = {
       'success' : updatePromotion,

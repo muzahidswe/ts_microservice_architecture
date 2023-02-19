@@ -11,6 +11,10 @@ export class CreateProfessionalMasterApiDto {
     @IsNotEmpty()
     @IsNumber()
     category_id: number;
+
+    @IsNotEmpty()
+    @IsString()
+    professional_id: string;
     
     @IsNotEmpty()
     @IsString()

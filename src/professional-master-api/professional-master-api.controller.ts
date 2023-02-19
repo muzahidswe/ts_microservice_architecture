@@ -17,13 +17,13 @@ export class ProfessionalMasterApiController {
   async create_professional(
     @Req() req: Request,
     @Res() res: Response,
-    @Body() createProfessionalMasterApiDto: CreateProfessionalMasterApiDto
+    @Body() createProfessionalMasterApiDto: CreateProfessionalMasterApiDto[]
   )
   {
-    const categoryList: any = await this.professionalMasterApiService.create_professional(createProfessionalMasterApiDto);
+    const professional: any = await this.professionalMasterApiService.create_professional(createProfessionalMasterApiDto);
     const result: object = {
-      'success' : categoryList,
-      'message' : categoryList ? 'Professional Added Successfully.' :  'Professional Added Failed.',
+      'success' : professional.success,
+      'message' : professional.msg,
       'data' : []
     }
     res.status(HttpStatus.OK).json(result);
@@ -33,11 +33,12 @@ export class ProfessionalMasterApiController {
   async professionalCategoryList(
     @Req() req: Request,
     @Res() res: Response
-    ) {
+  )
+  {
     const categoryList: any[] = await this.professionalMasterApiService.professionalCategoryList();
     const result: object = {
       'success' : (categoryList.length > 0) ? true : false,
-      'message' : (categoryList.length > 0) ? 'Category List Found Successfully.' : 'Category List Empty',
+      'message' : (categoryList.length > 0) ? 'Professional Category List Found Successfully.' : 'Professional Category List Not Found.',
       'data' : categoryList
     }
     res.status(HttpStatus.OK).json(result);
@@ -48,12 +49,13 @@ export class ProfessionalMasterApiController {
     @Req() req: Request,
     @Res() res: Response,
     @Body() getAllProfessionalFilterDto: GetAllProfessionalFilterDto
-    ) {
+    )
+  {
     const professionalList: any[] = await this.professionalMasterApiService.professionalList(getAllProfessionalFilterDto);
     const result: object = {
       'success' : (professionalList.length > 0) ? true : false,
-      'message' : (professionalList.length > 0) ? 'Professional List Found Successfully.' : 'Professional List Empty.',
-      'data' : []
+      'message' : (professionalList.length > 0) ? 'Professional List Found Successfully.' : 'Professional List Not Found.',
+      'data' : professionalList
     }
     res.status(HttpStatus.OK).json(result);
   }
@@ -63,7 +65,8 @@ export class ProfessionalMasterApiController {
     @Param('professional_id') professional_id: number,
     @Req() req: Request,
     @Res() res: Response
-    ) {    
+  )
+  {    
     const professionalDetailsById: any[] = await this.professionalMasterApiService.professionalDetailsById(professional_id);    
     const result: object = {
       'success' : professionalDetailsById ? true : false,
@@ -78,7 +81,8 @@ export class ProfessionalMasterApiController {
     @Param('professional_id') professional_id: string,
     @Req() req: Request,
     @Res() res: Response
-    ) {    
+  ) 
+  {    
     const professionalDetailsById: any[] = await this.professionalMasterApiService.professionalDetailsByProfessionalId(professional_id);    
     const result: object = {
       'success' : professionalDetailsById ? true : false,
@@ -88,16 +92,16 @@ export class ProfessionalMasterApiController {
     res.status(HttpStatus.OK).json(result);
   }
 
-  @Patch('update-professional/:id?')
+  @Patch('update-professional/:professional_id?')
   async updateProfessional(
-    @Param('id') id: number,
+    @Param('professional_id') professional_id: number,
     @Req() req: Request,
     @Res() res: Response,
     @Body() updateProfessionalMasterApiDto: UpdateProfessionalMasterApiDto[]) {
-    const updateProfessional: any = await this.professionalMasterApiService.updateProfessional(id, updateProfessionalMasterApiDto);   
+    const updateProfessional: any = await this.professionalMasterApiService.updateProfessional(professional_id, updateProfessionalMasterApiDto);   
     const result: object = {
-      'success' : updateProfessional,
-      'message' : updateProfessional ? 'Professional Updated Successfully.' : 'Professional Updated Failed.',
+      'success' : updateProfessional.success,
+      'message' : updateProfessional.msg,
       'data' : []
     }
     res.status(HttpStatus.OK).json(result);
