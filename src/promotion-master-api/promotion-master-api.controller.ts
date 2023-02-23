@@ -154,6 +154,24 @@ export class PromotionMasterApiController {
     }
     res.status(HttpStatus.OK).json(result);
   }
+
+  @Get('/promotion-sync-count/:user_id/:date?')
+  async promotionSyncCount(
+    @Param('user_id') user_id: number,
+    @Param('date') date: string,
+    @Req() req: Request,
+    @Res() res: Response
+  )
+  {    
+    const syncCount:any = await this.promotionMasterApiService.promotionSyncCount(user_id, date);    
+    const result: object = {
+      'success' : syncCount.success,
+      'message' : syncCount.msg,
+      'data' : syncCount.data
+    }
+    res.status(HttpStatus.OK).json(result);
+  }
+
 }
 function Query() {
   throw new Error('Function not implemented.');

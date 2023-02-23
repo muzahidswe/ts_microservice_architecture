@@ -595,6 +595,36 @@ export class ProfessionalMasterApiService {
     });
   }
 
+  async professionalSyncCount(user_id: number, date: string): Promise <any> {
+    return new Promise(async (resolve, reject) => {
+      try{
+        this.logger.log('Returning Professionals Sync Count.');
+        if(user_id && date){
+          const professionalList = await this.masterProfessionalListRepository
+              .createQueryBuilder('Professional')
+              .select([
+                'Professional.id AS id',
+                'Professional.professional_id AS professional_id'    
+              ])
+              .where("Professional.created_by = :user_id", { user_id: user_id })
+              .andWhere("DATE(Professional.request_date) = :date", { date: date })
+              .getRawMany();
+        
+          if(professionalList.length > 0 ){
+            resolve ({success: true, msg : 'Professional Data Count Found Successfully.', data: professionalList.length});
+          } else{
+            resolve ({success: false, msg : 'Professional Data is Empty.', data: 0});
+          }
+        } else {
+          resolve ({success: false, msg : 'API is Expecting User ID & Date.', data: 0});
+        }
+      } catch(errror){
+        console.log(errror);
+        reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
+      }
+    });
+  }
+
   async prepareProfessionalId (category_id: number): Promise<any>{
     return new Promise(async (resolve, reject) => {
       try {

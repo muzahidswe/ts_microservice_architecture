@@ -3,10 +3,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean,IsISO8601, IsDate, IsDateString, IsDecimal, IsNotEmpty, isArray, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 
 export class CreateProfessionalMasterApiDto {
-
-    // @IsNotEmpty()
-    // @IsString()
-    // professional_id: string;
     
     @IsNotEmpty()
     @IsNumber()

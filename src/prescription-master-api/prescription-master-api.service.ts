@@ -106,6 +106,35 @@ export class PrescriptionMasterApiService {
     });
   }
 
+  async prescriptionSyncCount(user_id: number, date: string): Promise <any> {
+    return new Promise(async (resolve, reject) => {
+      try{
+        this.logger.log('Returning Prescription Sync Count.');
+        if(user_id && date){
+          const prescriptionList = await this.masterPrescriptionListRepository
+              .createQueryBuilder('Prescription')
+              .select([
+                'Prescription.professional_id AS professional_id',    
+              ])
+              .where("Prescription.created_by = :user_id", { user_id: user_id })
+              .andWhere("DATE(Prescription.created) = :date", { date: date })
+              .getRawMany();
+        
+          if(prescriptionList.length > 0 ){
+            resolve ({success: true, msg : 'Prescription Data Count Found Successfully.', data: prescriptionList.length});
+          } else{
+            resolve ({success: false, msg : 'Prescription Data is Empty.', data: 0});
+          }
+        } else {
+          resolve ({success: false, msg : 'API is Expecting User ID & Date.', data: 0});
+        }
+      } catch(errror){
+        console.log(errror);
+        reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
+      }
+    });
+  }
+
   async base64_to_image(base64Data: string[], image_path: string, prescription_id: number, created_by: number): Promise<any>{
     return new Promise(async (resolve, reject) => {
       try {

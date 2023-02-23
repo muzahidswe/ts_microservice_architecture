@@ -436,6 +436,35 @@ export class PromotionMasterApiService {
     });
   }
 
+  async promotionSyncCount(user_id: number, date: string): Promise <any> {
+    return new Promise(async (resolve, reject) => {
+      try{
+        this.logger.log('Returning Promotion Sync Count.');
+        if(user_id && date){
+          const promotionList = await this.masterPromotionRepository
+            .createQueryBuilder('Promotion')    
+            .select([
+              'Promotion.professional_id AS professional_id',
+            ])
+            .where("Promotion.created_by = :user_id", { user_id: user_id })
+            .andWhere("DATE(Promotion.request_date) = :date", { date: date })
+            .getRawMany();
+        
+          if(promotionList.length > 0 ){
+            resolve ({success: true, msg : 'Promotion Data Count Found Successfully.', data: promotionList.length});
+          } else{
+            resolve ({success: false, msg : 'Promotion Data is Empty.', data: 0});
+          }
+        } else {
+          resolve ({success: false, msg : 'API is Expecting User ID & Date.', data: 0});
+        }
+      } catch(errror){
+        console.log(errror);
+        reject (new HttpException('Forbidden', HttpStatus.FORBIDDEN));
+      }
+    });
+  }
+
   async calculateDateRange(limit: string){
     try {
       const currentdate = new Date();
