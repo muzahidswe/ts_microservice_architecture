@@ -190,14 +190,18 @@ export class PromotionMasterApiService {
           .createQueryBuilder('Promotion')
           .select([
             'Promotion.id as id',
+            'category.name AS category_name',
             'Promotion.promotion_category_id AS promotion_category_id',
             'Promotion.professional_id AS professional_id',
             'Promotion.promotion_id AS promotion_id',
             'Promotion.promotion_value AS promotion_value',
             'Promotion.usable_value AS usable_value',
+            'Promotion.promotion_description AS promotion_description',
+            'Promotion.comments AS comments',
             'Promotion.created_by AS issued_by',
             'DATE_FORMAT(Promotion.created, "%Y-%m-%d") as created_date'
           ])
+          .innerJoin('ms_promotion_category', 'category', 'category.id = Promotion.promotion_category_id')
           // activation_status 0 = Inactive Promotion; 1 = Active Promotion; 2 = Deactivate Promotion
           .addSelect(`CASE
               WHEN Promotion.activation_status = 0 THEN 'Inactive'
