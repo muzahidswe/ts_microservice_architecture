@@ -189,6 +189,7 @@ export class PromotionMasterApiService {
         const promotionInfo = await this.masterPromotionRepository
           .createQueryBuilder('Promotion')
           .select([
+            'Promotion.id as id',
             'Promotion.promotion_category_id AS promotion_category_id',
             'Promotion.professional_id AS professional_id',
             'Promotion.promotion_id AS promotion_id',
