@@ -1,6 +1,6 @@
-import { Column, CreateDateColumn,  Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity({name: "ms_promotion_list"})
+@Entity({ name: "ms_promotion_list" })
 export class MasterPromotionEntity {
 
     @PrimaryGeneratedColumn()
@@ -23,7 +23,7 @@ export class MasterPromotionEntity {
 
     @Column()
     usable_value: number;
-  
+
     @Column()
     comments: string;
 
@@ -38,17 +38,17 @@ export class MasterPromotionEntity {
 
     @CreateDateColumn()
     request_date: Date;
-    
+
     @Column()
     created_by: number;
 
-    @CreateDateColumn({type: 'timestamp'})
+    @CreateDateColumn({ type: 'timestamp' })
     created: Date;
 
     @Column()
     updated_by: number;
 
-    @CreateDateColumn({type: 'timestamp'})
+    @CreateDateColumn({ type: 'timestamp' })
     updated: Date;
 
 }
