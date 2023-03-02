@@ -145,8 +145,10 @@ export class ProfessionalMasterApiService {
               'Professional.category_id AS category_id',
               "Category.name AS category_name",
               'Professional.name AS professional_name',
+              'Professional.organization AS organization',
               'Professional.designation AS designation',
               'Professional.department AS department',
+              'Professional.chamber AS chamber',
               // 'DivisionInfo.id AS division_id',
               'DivisionInfo.slug AS division_name',
               // 'RegionInfo.id AS region_id',
@@ -157,8 +159,12 @@ export class ProfessionalMasterApiService {
               'TerritoryInfo.slug AS territory_name',
               // 'section_mapping.dep_id AS point_id',
               'DistributorPoint.name AS point_name',
+              // 'Route.id AS route_id',
+              'Route.slug AS route_name',
               'Professional.academic_background AS academic_background',
-              'Professional.visit_fee AS visit_fee'
+              'Professional.visit_fee AS visit_fee',
+              // organization, contact no, chamber, route
+              'Professional.mobile_number AS contact_no',
             ])
             // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
             .addSelect(`CASE
@@ -188,6 +194,8 @@ export class ProfessionalMasterApiService {
             // to fetch territory
             .innerJoin('master_dep_location_mapping', 'TerritoryMapping', '`Professional`.`dep_id` = `TerritoryMapping`.`dep_id` AND `TerritoryMapping`.`location_type` = :territory_location_type', { territory_location_type: 20 })
             .innerJoin('master_locations', 'TerritoryInfo', '`TerritoryMapping`.`location_id` = `TerritoryInfo`.`id`')
+            // to fetch route
+            .innerJoin('master_routes', 'Route', '`Professional`.`route_id` = `Route`.`id`')
             // .where("Professional.activation_status = :activation_status", { activation_status: 1 })
             .andWhere(
               (((searchFilter.point_ids).length != 0) ? professionalList => professionalList.where("Professional.dep_id IN (:point_ids)", { point_ids: searchFilter.point_ids }) : '')
@@ -238,13 +246,16 @@ export class ProfessionalMasterApiService {
                 'TerritoryInfo.slug AS territory_name',
                 // 'section_mapping.dep_id AS point_id',
                 'DistributorPoint.name AS point_name',
+                // 'Route.id AS route_id',
+                'Route.slug AS route_name',
                 'Professional.contract_value AS contract_value',
                 'Professional.contract_tenure AS contract_tenure',
                 'Professional.patients_per_week AS patients_per_week',
                 'Professional.baby_food_prescriptions AS baby_food_prescriptions',
                 'Professional.prescription_for_mother_smile AS prescription_for_mother_smile',
                 'Professional.image_path AS image_path',
-                'Professional.comments AS comments'
+                'Professional.comments AS comments',
+                'Professional.dob AS dob'
               ])
               // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
               .addSelect(`CASE
@@ -274,6 +285,8 @@ export class ProfessionalMasterApiService {
               // to fetch territory
               .innerJoin('master_dep_location_mapping', 'TerritoryMapping', '`Professional`.`dep_id` = `TerritoryMapping`.`dep_id` AND `TerritoryMapping`.`location_type` = :territory_location_type', { territory_location_type: 20 })
               .innerJoin('master_locations', 'TerritoryInfo', '`TerritoryMapping`.`location_id` = `TerritoryInfo`.`id`')
+              // to fetch route
+              .innerJoin('master_routes', 'Route', '`Professional`.`route_id` = `Route`.`id`')
               .where("Professional.id = :professional_id", { professional_id: professional_id })
               .getRawMany();
           
@@ -294,13 +307,13 @@ export class ProfessionalMasterApiService {
 
           if (presenceDetails) {
             const visiting_schedule = [];
-            presenceDetails.map(details => {
+            for(const details of presenceDetails){
               if(professionalDetails[0].calendar_type == 'weekly'){
                 visiting_schedule.push({day : details.presence_weekday, time : details.visiting_time});
               } else if(professionalDetails[0].calendar_type == 'monthly'){
                 visiting_schedule.push({day : details.presence_month_date, time : details.visiting_time});
               }
-            });
+            }
             professionalDetails[0]['visiting_schedule'] = visiting_schedule;
           }
           resolve (professionalDetails);
