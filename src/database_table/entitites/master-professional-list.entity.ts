@@ -1,6 +1,6 @@
-import { Column, CreateDateColumn,  Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity({name: "ms_professional_list"})
+@Entity({ name: "ms_professional_list" })
 export class MasterProfessionalList {
 
     @PrimaryGeneratedColumn()
@@ -11,9 +11,12 @@ export class MasterProfessionalList {
 
     @Column()
     category_id: number;
-    
+
     @Column()
     name: string;
+
+    @Column()
+    dob: string;
 
     @Column()
     designation: string;
@@ -23,19 +26,19 @@ export class MasterProfessionalList {
 
     @Column()
     organization: string;
-    
+
     @Column()
     contact_person: string;
-    
+
     @Column()
     mobile_number: string;
-    
+
     @Column()
     academic_background: string;
 
     @Column()
     visit_fee: number;
-    
+
     @Column()
     calendar_type: string;
 
@@ -53,7 +56,7 @@ export class MasterProfessionalList {
 
     @Column()
     contract_value: number;
-    
+
     @Column()
     contract_tenure: number;
 
@@ -62,10 +65,10 @@ export class MasterProfessionalList {
 
     @Column()
     baby_food_prescriptions: number;
-    
+
     @Column()
     prescription_for_mother_smile: number;
-    
+
     @Column()
     image_path: string;
 
@@ -80,23 +83,23 @@ export class MasterProfessionalList {
 
     @Column()
     activated_by: number;
-    
+
     @CreateDateColumn()
     activation_date: Date;
 
     @CreateDateColumn()
     request_date: Date;
-    
+
     @Column()
     created_by: number;
 
-    @CreateDateColumn({type: 'timestamp'})
+    @CreateDateColumn({ type: 'timestamp' })
     created: Date;
 
     @Column()
     updated_by: number;
 
-    @CreateDateColumn({type: 'timestamp'})
+    @CreateDateColumn({ type: 'timestamp' })
     updated: Date;
 
 }

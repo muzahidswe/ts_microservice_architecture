@@ -159,7 +159,7 @@ export class PromotionMasterApiService {
           // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
           .addSelect(`CASE
                 WHEN professionalInfo.request_status = 0 THEN 'Decline'
-                WHEN professionalInfo.request_status = 1 THEN 'Approved'
+                WHEN professionalInfo.reques.createQueryBuilder().upt_status = 1 THEN 'Approved'
                 WHEN professionalInfo.request_status = 2 THEN 'Edit'
                 WHEN professionalInfo.request_status = 3 THEN 'New'
               END`, 'request_status')
