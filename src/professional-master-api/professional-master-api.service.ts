@@ -110,9 +110,9 @@ export class ProfessionalMasterApiService {
                   for (let i = 0; i < visiting_schedule.length; i++) {
                     let details = visiting_schedule[i];
                     if (rest.calendar_type.toLowerCase() == 'weekly') {
-                      data.push({ professional_id: existing.id, presence_weekday: details['day'], presence_month_date: null, visiting_time: details['time'].format('hh:mm:ss'), created_by: rest.created_by });
+                      data.push({ professional_id: existing.id, presence_weekday: details['day'], presence_month_date: null, visiting_time: details['time'], created_by: rest.created_by });
                     } else if (rest.calendar_type.toLowerCase() == 'monthly') {
-                      data.push({ professional_id: existing.id, presence_weekday: null, presence_month_date: details['day'], visiting_time: details['time'].format('hh:mm:ss'), created_by: rest.created_by });
+                      data.push({ professional_id: existing.id, presence_weekday: null, presence_month_date: details['day'], visiting_time: details['time'], created_by: rest.created_by });
                     }
 
                   }
