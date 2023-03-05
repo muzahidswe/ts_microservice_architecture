@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MasterProfessionalListRepository } from 'src/database_table/repository/master-professional-list.repository';
 import { ProfessionalCategoryRepository } from 'src/database_table/repository/ms_professional_category.repository';
 import { ProfessionalPresenceDetailsRepository } from 'src/database_table/repository/ms_professional_presence_details.repository';
+import { MasterPrescriptionListRepository } from 'src/database_table/repository/master-prescription-list.repository';
 import { CategoryList, ProfessionalList, ProfessionalDetails } from './entities/professional-master-api.entity';
 import { Any, Binary } from 'typeorm';
 const fs = require('fs');
@@ -20,7 +21,10 @@ export class ProfessionalMasterApiService {
     private readonly professionalCategoryRepository: ProfessionalCategoryRepository,
 
     @InjectRepository(ProfessionalPresenceDetailsRepository)
-    private readonly professionalPresenceDetailsRepository: ProfessionalPresenceDetailsRepository
+    private readonly professionalPresenceDetailsRepository: ProfessionalPresenceDetailsRepository,
+
+    @InjectRepository(MasterPrescriptionListRepository)
+    private readonly masterPrescriptionListRepository: MasterPrescriptionListRepository
   ) {
   }
 
@@ -316,6 +320,18 @@ export class ProfessionalMasterApiService {
             }
             professionalDetails[0]['visiting_schedule'] = visiting_schedule;
           }
+
+          const prescriptionList = await this.masterPrescriptionListRepository
+            .createQueryBuilder('Prescription')    
+            .select([
+              'Prescription.id AS id',
+            ])
+            .where("Prescription.professional_id = :professional_id", { professional_id: professional_id })
+            .where("Prescription.status = :status", { status: 1 })
+            .getRawMany();
+
+          professionalDetails[0]['prescription_count'] = prescriptionList.length
+
           resolve (professionalDetails);
         } else {
           resolve ([]);
