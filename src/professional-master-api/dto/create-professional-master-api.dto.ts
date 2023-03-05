@@ -1,9 +1,7 @@
-import { Transform, Type } from "class-transformer";
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean,IsISO8601, IsDate, IsDateString, IsDecimal, IsNotEmpty, isArray, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateProfessionalMasterApiDto {
-    
+
     @IsNotEmpty()
     @IsNumber()
     category_id: number;
@@ -11,15 +9,19 @@ export class CreateProfessionalMasterApiDto {
     @IsNotEmpty()
     @IsString()
     professional_id: string;
-    
+
     @IsNotEmpty()
     @IsString()
     name: string;
 
+    @IsNotEmpty()
+    @IsString()
+    dob: string;
+
     @IsOptional()
     @IsString()
-    designation: string;    
-    
+    designation: string;
+
     @IsNotEmpty()
     @IsString()
     department: string;
@@ -27,7 +29,7 @@ export class CreateProfessionalMasterApiDto {
     @IsOptional()
     @IsString()
     organization: string;
-        
+
     @IsOptional()
     @IsString()
     contact_person: string;
@@ -39,18 +41,18 @@ export class CreateProfessionalMasterApiDto {
     @IsOptional()
     @IsString()
     academic_background: string;
-    
+
     @IsOptional()
     @IsNumber()
     visit_fee: number;
-    
+
     @IsOptional()
     @IsString()
     calendar_type: string;
-    
-    @IsOptional()    
+
+    @IsOptional()
     visiting_schedule: object[];
-        
+
     @IsOptional()
     @IsString()
     chamber: string;
@@ -66,15 +68,15 @@ export class CreateProfessionalMasterApiDto {
     @IsNotEmpty()
     @IsNumber()
     route_id: number;
-    
+
     @IsNotEmpty()
     @IsNumber()
     contract_value: number;
-    
+
     @IsNotEmpty()
     @IsNumber()
     contract_tenure: number;
-    
+
     @IsOptional()
     @IsNumber()
     patients_per_week: number;
@@ -93,14 +95,14 @@ export class CreateProfessionalMasterApiDto {
 
     @IsOptional()
     @IsString()
-    comments: string;    
-    
+    comments: string;
+
     @IsNotEmpty()
     @IsNumber()
     created_by: number;
 }
 
-export class GetAllProfessionalFilterDto{
+export class GetAllProfessionalFilterDto {
     @IsNotEmpty()
     point_ids: number[];
 }
