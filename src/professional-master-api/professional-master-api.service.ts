@@ -103,6 +103,8 @@ export class ProfessionalMasterApiService {
                     patients_per_week: Number(rest.patients_per_week),
                     baby_food_prescriptions: Number(rest.baby_food_prescriptions),
                     prescription_for_mother_smile: Number(rest.prescription_for_mother_smile),
+                    activation_status: 0,
+                    request_status: 2,
                     comments: rest.comments,
                     updated_by: rest.created_by
                   })
