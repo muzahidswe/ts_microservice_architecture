@@ -368,6 +368,9 @@ export class ProfessionalMasterApiService {
             }
             professionalDetails[0]['visiting_schedule'] = visiting_schedule;
           }
+          professionalDetails[0]['last_promotion'] = 10000;
+          professionalDetails[0]['total_promotion'] = 50000;
+          professionalDetails[0]['last_visit_by'] = 'Ankur Ahmed - pdo2001';
           resolve(professionalDetails);
         } else {
           resolve([]);
