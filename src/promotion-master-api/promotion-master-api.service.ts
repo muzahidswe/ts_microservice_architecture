@@ -247,6 +247,7 @@ export class PromotionMasterApiService {
               'PromotionCategory.name AS promotion_category_name',
               'professionalInfo.name AS professional_name',
               'professionalInfo.designation AS designation',
+              'professionalInfo.dob AS dob',
               'professionalInfo.department AS department',
               'professionalInfo.organization AS organization',
               'professionalInfo.mobile_number AS mobile_number',

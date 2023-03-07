@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { MasterPrescriptionListRepository } from 'src/database_table/repository/master-prescription-list.repository';
 import { MasterProfessionalListRepository } from 'src/database_table/repository/master-professional-list.repository';
 import { ProfessionalCategoryRepository } from 'src/database_table/repository/ms_professional_category.repository';
 import { ProfessionalPresenceDetailsRepository } from 'src/database_table/repository/ms_professional_presence_details.repository';
@@ -7,7 +8,6 @@ import { Binary } from 'typeorm';
 import { CreateProfessionalMasterApiDto, GetAllProfessionalFilterDto } from './dto/create-professional-master-api.dto';
 import { ProfessionalStatusUpdateDto, UpdateProfessionalMasterApiDto } from './dto/update-professional-master-api.dto';
 import { CategoryList, ProfessionalDetails, ProfessionalList } from './entities/professional-master-api.entity';
-import { MasterPrescriptionListRepository } from 'src/database_table/repository/master-prescription-list.repository';
 const fs = require('fs');
 
 @Injectable()
@@ -71,6 +71,13 @@ export class ProfessionalMasterApiService {
                 const { visiting_schedule, image_data = null, ...rest } = professional
 
                 if (image_data) {
+
+                  // remove previous image
+                  fs.unlink(`${existing.image_path}`, (err: any) => {
+                    if (err) return false;
+                    else return true;
+                  });
+
                   await this.base64_to_image(professional.image_data, image_path, professional.professional_id);
                 }
                 await this.masterProfessionalListRepository
@@ -284,6 +291,7 @@ export class ProfessionalMasterApiService {
               'Professional.organization AS organization',
               'Professional.contact_person AS contact_person',
               'Professional.mobile_number AS mobile_number',
+              'Professional.dob AS dob',
               'Professional.academic_background AS academic_background',
               'Professional.visit_fee AS visit_fee',
               'Professional.calendar_type AS calendar_type',
