@@ -6,9 +6,10 @@ import { ProfessionalCategoryRepository } from '../database_table/repository/ms_
 import { MasterProfessionalListRepository } from 'src/database_table/repository/master-professional-list.repository';
 import { ProfessionalPresenceDetailsRepository } from 'src/database_table/repository/ms_professional_presence_details.repository';
 import { MasterPrescriptionListRepository } from 'src/database_table/repository/master-prescription-list.repository';
+import { MasterPromotionRepository } from 'src/database_table/repository/master-promotion.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProfessionalCategoryRepository, MasterProfessionalListRepository, ProfessionalPresenceDetailsRepository, MasterPrescriptionListRepository])],
+  imports: [TypeOrmModule.forFeature([ProfessionalCategoryRepository, MasterProfessionalListRepository, ProfessionalPresenceDetailsRepository, MasterPrescriptionListRepository, MasterPromotionRepository])],
   controllers: [ProfessionalMasterApiController],
   providers: [ProfessionalMasterApiService]
 })

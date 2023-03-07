@@ -8,6 +8,7 @@ import { Binary } from 'typeorm';
 import { CreateProfessionalMasterApiDto, GetAllProfessionalFilterDto } from './dto/create-professional-master-api.dto';
 import { ProfessionalStatusUpdateDto, UpdateProfessionalMasterApiDto } from './dto/update-professional-master-api.dto';
 import { CategoryList, ProfessionalDetails, ProfessionalList } from './entities/professional-master-api.entity';
+import { MasterPromotionRepository } from 'src/database_table/repository/master-promotion.repository';
 const fs = require('fs');
 
 @Injectable()
@@ -24,7 +25,11 @@ export class ProfessionalMasterApiService {
     private readonly professionalPresenceDetailsRepository: ProfessionalPresenceDetailsRepository,
 
     @InjectRepository(MasterPrescriptionListRepository)
-    private readonly masterPrescriptionListRepository: MasterPrescriptionListRepository
+    private readonly masterPrescriptionListRepository: MasterPrescriptionListRepository,
+
+    @InjectRepository(MasterPromotionRepository)
+    private readonly masterPromotionRepository: MasterPromotionRepository,
+
   ) {
   }
 
@@ -364,8 +369,11 @@ export class ProfessionalMasterApiService {
               'Presence.visiting_time AS visiting_time'
             ])
             .where("Presence.professional_id = :professional_id", { professional_id: professional_id })
-            .where("Presence.status = :status", { status: 1 })
+            .andWhere("Presence.status = :status", { status: 1 })
             .getRawMany();
+
+          console.log('presenceDetails');
+          console.log(presenceDetails);
 
           if (presenceDetails) {
             const visiting_schedule = [];
@@ -378,9 +386,32 @@ export class ProfessionalMasterApiService {
             }
             professionalDetails[0]['visiting_schedule'] = visiting_schedule;
           }
-          professionalDetails[0]['last_promotion'] = 10000;
-          professionalDetails[0]['total_promotion'] = 50000;
-          professionalDetails[0]['last_visit_by'] = 'Ankur Ahmed - pdo2001';
+
+          const promotionInfo = await this.masterPromotionRepository
+            .createQueryBuilder('Promotion')
+            .select([
+              'Promotion.promotion_value AS promotion_value',
+              'Promotion.usable_value AS usable_value',
+              'FieldForces.fullname AS fullname',
+              'FieldForces.username AS username'
+            ])
+            .innerJoin('master_field_forces', 'FieldForces', '`FieldForces`.`id` = `Promotion`.`created_by`')
+            .where("Promotion.professional_id = :professional_id", { professional_id: professional_id })
+            .orderBy('Promotion.id', 'ASC')
+            .getRawMany();
+
+          let last_promotion: Number = 0;
+          let total_promotion: Number = 0;
+          let last_visit_by: string = 'N/A';
+          for(const promotion of promotionInfo){
+            last_promotion = Number(promotion.promotion_value);
+            total_promotion += promotion.promotion_value;
+            last_visit_by = promotion.fullname + ' - ' + promotion.username;
+          }
+
+          professionalDetails[0]['last_promotion'] = last_promotion;
+          professionalDetails[0]['total_promotion'] = total_promotion;
+          professionalDetails[0]['last_visit_by'] = last_visit_by;
           resolve(professionalDetails);
         } else {
           resolve([]);
@@ -475,7 +506,7 @@ export class ProfessionalMasterApiService {
               'Presence.visiting_time AS visiting_time'
             ])
             .where("Presence.professional_id = :professional_id", { professional_id: professional_id })
-            .where("Presence.status = :status", { status: 1 })
+            .andWhere("Presence.status = :status", { status: 1 })
             .getRawMany();
 
           if (presenceDetails) {
