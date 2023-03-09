@@ -33,6 +33,9 @@ export class MasterPromotionEntity {
     @Column()
     request_status: number;
 
+    @Column()
+    activated_by: number;
+
     @CreateDateColumn()
     activation_date: Date;
 

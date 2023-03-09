@@ -368,7 +368,7 @@ export class PromotionMasterApiService {
               activation_date: new Date(),
               updated_by: payload.updated_by !== undefined ? Number(payload.updated_by) : null
             })
-            .andWhere("ms_promotion_list.id IN(:promotion_ids)", { promotion_ids: payload.promotion_ids })
+            .where("ms_promotion_list.id IN(:promotion_ids)", { promotion_ids: payload.promotion_ids })
             .andWhere("ms_promotion_list.activation_status IN(:activation_status)", { activation_status: [0, 2] })
             // .andWhere("ms_promotion_list.request_status IN(:activation_status)", { activation_status : [0, 1, 2, 3] })
             .execute();
@@ -402,7 +402,7 @@ export class PromotionMasterApiService {
               activation_date: new Date(),
               updated_by: payload.updated_by !== undefined ? Number(payload.updated_by) : null
             })
-            .andWhere("ms_promotion_list.id IN(:promotion_ids)", { promotion_ids: payload.promotion_ids })
+            .where("ms_promotion_list.id IN(:promotion_ids)", { promotion_ids: payload.promotion_ids })
             .andWhere("ms_promotion_list.activation_status IN(:activation_status)", { activation_status: [0] })
             // .andWhere("ms_promotion_list.request_status IN(:activation_status)", { activation_status : [2, 3] })
             .execute();
