@@ -215,8 +215,7 @@ export class PromotionMasterApiService {
               WHEN Promotion.request_status = 2 THEN 'Edit'
               WHEN Promotion.request_status = 3 THEN 'New'
             END`, 'request_status')
-          .where("Promotion.status = :status", { status: 1 })
-          .andWhere("Promotion.professional_id = :professional_id", { professional_id: professional_id })
+          .where("Promotion.professional_id = :professional_id", { professional_id: professional_id })
           .andWhere(`DATE(Promotion.created) BETWEEN '${dateRange.start_date}' AND '${dateRange.last_date}'`)
           .orderBy('Promotion.id', 'DESC')
           .getRawMany();
