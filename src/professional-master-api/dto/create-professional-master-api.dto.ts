@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { ArrayMinSize, IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
 
 export class CreateProfessionalMasterApiDto {
 
@@ -51,7 +52,10 @@ export class CreateProfessionalMasterApiDto {
     calendar_type: string;
 
     @IsOptional()
-    visiting_schedule: object[];
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => visiting_schedule)
+    visiting_schedule: visiting_schedule[];
 
     @IsOptional()
     @IsString()
@@ -100,6 +104,32 @@ export class CreateProfessionalMasterApiDto {
     @IsNotEmpty()
     @IsNumber()
     created_by: number;
+}
+
+class visiting_schedule {
+
+    @IsNotEmpty()
+    @IsString()
+    day: string;
+
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => visiting_time)
+    time: visiting_time[];
+
+}
+
+class visiting_time {
+
+    @IsNotEmpty()
+    @IsString()
+    from: string;
+
+    @IsNotEmpty()
+    @IsString()
+    to: string;
+
 }
 
 export class GetAllProfessionalFilterDto {

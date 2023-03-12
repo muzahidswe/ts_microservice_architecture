@@ -126,13 +126,12 @@ export class ProfessionalMasterApiService {
                 if (visiting_schedule && visiting_schedule.length > 0) {
                   let data: any[] = [];
                   for (let i = 0; i < visiting_schedule.length; i++) {
-                    let details = visiting_schedule[i];
+                    let details = visiting_schedule[i];                   
                     if (rest.calendar_type.toLowerCase() == 'weekly') {
-                      data.push({ professional_id: existing.id, presence_weekday: details['day'], presence_month_date: null, visiting_time: details['time'], created_by: rest.created_by });
+                      data.push({ professional_id: existing.id, presence_weekday: details['day'], presence_month_date: null, visiting_start_time: details['time']['from'], visiting_end_time: details['time']['to'], created_by: rest.created_by });
                     } else if (rest.calendar_type.toLowerCase() == 'monthly') {
-                      data.push({ professional_id: existing.id, presence_weekday: null, presence_month_date: details['day'], visiting_time: details['time'], created_by: rest.created_by });
+                      data.push({ professional_id: existing.id, presence_weekday: null, presence_month_date: details['day'], visiting_start_time: details['time']['from'], visiting_end_time: details['time']['to'], created_by: rest.created_by });
                     }
-
                   }
                   await this.professionalPresenceDetailsRepository.insert(data)
                 }
@@ -174,9 +173,9 @@ export class ProfessionalMasterApiService {
                     let scheduleData = [];
                     professional.visiting_schedule.map(details => {
                       if (professional.calendar_type.toLowerCase() == 'weekly') {
-                        scheduleData.push({ professional_id: insertLog.identifiers[0].id, presence_weekday: details['day'], presence_month_date: null, visiting_time: details['time'], created_by: professional.created_by });
+                        scheduleData.push({ professional_id: insertLog.identifiers[0].id, presence_weekday: details['day'], presence_month_date: null, visiting_start_time: details['time']['from'], visiting_end_time: details['time']['to'], created_by: professional.created_by });
                       } else if (professional.calendar_type.toLowerCase() == 'monthly') {
-                        scheduleData.push({ professional_id: insertLog.identifiers[0].id, presence_weekday: null, presence_month_date: details['day'], visiting_time: details['time'], created_by: professional.created_by });
+                        scheduleData.push({ professional_id: insertLog.identifiers[0].id, presence_weekday: null, presence_month_date: details['day'], visiting_start_time: details['time']['from'], visiting_end_time: details['time']['to'], created_by: professional.created_by });
                       }
                     });
                     await this.professionalPresenceDetailsRepository.insert(scheduleData);
@@ -366,22 +365,20 @@ export class ProfessionalMasterApiService {
             .select([
               'Presence.presence_weekday AS presence_weekday',
               'Presence.presence_month_date AS presence_month_date',
-              'Presence.visiting_time AS visiting_time'
+              'Presence.visiting_start_time AS visiting_start_time',
+              'Presence.visiting_end_time AS visiting_end_time'
             ])
             .where("Presence.professional_id = :professional_id", { professional_id: professional_id })
             .andWhere("Presence.status = :status", { status: 1 })
             .getRawMany();
 
-          console.log('presenceDetails');
-          console.log(presenceDetails);
-
           if (presenceDetails) {
             const visiting_schedule = [];
             for (const details of presenceDetails) {
               if (professionalDetails[0].calendar_type == 'weekly') {
-                visiting_schedule.push({ day: details.presence_weekday, time: details.visiting_time });
+                visiting_schedule.push({ day: details.presence_weekday, visiting_start_time: details.visiting_start_time, visiting_end_time: details.visiting_end_time });
               } else if (professionalDetails[0].calendar_type == 'monthly') {
-                visiting_schedule.push({ day: details.presence_month_date, time: details.visiting_time });
+                visiting_schedule.push({ day: details.presence_month_date, visiting_start_time: details.visiting_start_time, visiting_end_time: details.visiting_end_time });
               }
             }
             professionalDetails[0]['visiting_schedule'] = visiting_schedule;
@@ -503,7 +500,8 @@ export class ProfessionalMasterApiService {
             .select([
               'Presence.presence_weekday AS presence_weekday',
               'Presence.presence_month_date AS presence_month_date',
-              'Presence.visiting_time AS visiting_time'
+              'Presence.visiting_start_time AS visiting_start_time',
+              'Presence.visiting_end_time AS visiting_end_time'
             ])
             .where("Presence.professional_id = :professional_id", { professional_id: professional_id })
             .andWhere("Presence.status = :status", { status: 1 })
@@ -513,9 +511,9 @@ export class ProfessionalMasterApiService {
             const visiting_schedule = [];
             presenceDetails.map(details => {
               if (professionalDetails[0].calendar_type == 'weekly') {
-                visiting_schedule.push({ day: details.presence_weekday, time: details.visiting_time });
+                visiting_schedule.push({ day: details.presence_weekday, visiting_start_time: details.visiting_start_time, visiting_end_time: details.visiting_end_time });
               } else if (professionalDetails[0].calendar_type == 'monthly') {
-                visiting_schedule.push({ day: details.presence_month_date, time: details.visiting_time });
+                visiting_schedule.push({ day: details.presence_month_date, visiting_start_time: details.visiting_start_time, visiting_end_time: details.visiting_end_time });
               }
             });
             professionalDetails[0]['visiting_schedule'] = visiting_schedule;
@@ -580,9 +578,9 @@ export class ProfessionalMasterApiService {
               const scheduleData = [];
               apiData.visiting_schedule.map(details => {
                 if (apiData.calendar_type == 'weekly') {
-                  scheduleData.push({ professional_id: professional_id, presence_weekday: details['day'], presence_month_date: null, visiting_time: details['time'], created_by: apiData.updated_by });
+                  scheduleData.push({ professional_id: professional_id, presence_weekday: details['day'], presence_month_date: null, visiting_start_time: details['time']['from'], visiting_end_time: details['time']['to'], created_by: apiData.updated_by });
                 } else if (apiData.calendar_type == 'monthly') {
-                  scheduleData.push({ professional_id: professional_id, presence_weekday: null, presence_month_date: details['day'], visiting_time: details['time'], created_by: apiData.updated_by });
+                  scheduleData.push({ professional_id: professional_id, presence_weekday: null, presence_month_date: details['day'], visiting_start_time: details['time']['from'], visiting_end_time: details['time']['to'], created_by: apiData.updated_by });
                 }
               });
               await this.professionalPresenceDetailsRepository.insert(scheduleData);

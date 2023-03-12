@@ -16,7 +16,10 @@ export class ProfessionalPresenceDetails {
     presence_month_date: string;
 	
 	@Column()
-    visiting_time: string;
+    visiting_start_time: string;
+
+    @Column()
+    visiting_end_time: string;
 	
 	@Column()
     status: number;
