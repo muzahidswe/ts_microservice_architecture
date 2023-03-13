@@ -15,7 +15,7 @@ export class CreateProfessionalMasterApiDto {
     @IsString()
     name: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     dob: string;
 
