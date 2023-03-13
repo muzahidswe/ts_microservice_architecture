@@ -74,7 +74,7 @@ export class PromotionMasterApiService {
                   'Promotion.expenses AS expenses'
                 ])
                 .where("Promotion.status = :status", { status: 1 })
-                .andWhere("Promotion.dep_id = :dep_id", { dep_id: promotion.dep_id })
+                .andWhere(`Promotion.dep_id IN :dep_id`, { dep_id: promotion.dep_id })
                 .andWhere("Promotion.ff_id = :ff_id", { ff_id: promotion.ff_id })
                 .andWhere("Promotion.month = :month", { month: month })
                 .andWhere("Promotion.year = :year", { year: year })
