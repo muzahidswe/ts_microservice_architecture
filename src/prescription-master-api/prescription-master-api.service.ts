@@ -84,9 +84,12 @@ export class PrescriptionMasterApiService {
           .select([
             'PrescriptionImage.id AS image_id',
             'Prescription.professional_id AS professional_id',
-            'PrescriptionImage.image_path AS image_path'
+            'PrescriptionImage.image_path AS image_path',
+            "DATE_FORMAT(Prescription.created, '%Y/%m/%d') as upload_at",
+            "field_force.username as issued_by",
           ])
           .innerJoin('ms_prescription_image_details', 'PrescriptionImage', '`PrescriptionImage`.`prescription_id` = `Prescription`.`id`')
+          .innerJoin('master_field_forces', 'field_force', 'field_force.id = Prescription.created_by')
           .where("Prescription.status = :status AND Prescription.professional_id = :professional_id AND PrescriptionImage.status = :extra_status", { status: 1, professional_id: professional_id, extra_status: 1 })
           .andWhere(`DATE(Prescription.created) BETWEEN '${dateRange.start_date}' AND '${dateRange.last_date}'`)
           .orderBy('Prescription.professional_id', 'DESC')
