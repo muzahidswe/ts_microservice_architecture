@@ -55,6 +55,9 @@ export class MasterProfessionalList {
     route_id: number;
 
     @Column()
+    contract_type: string;
+
+    @Column()
     contract_value: number;
 
     @Column()

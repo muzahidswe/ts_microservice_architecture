@@ -74,6 +74,10 @@ export class CreateProfessionalMasterApiDto {
     route_id: number;
 
     @IsNotEmpty()
+    @IsString()
+    contract_type: string;
+
+    @IsNotEmpty()
     @IsNumber()
     contract_value: number;
 

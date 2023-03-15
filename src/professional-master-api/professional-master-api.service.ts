@@ -104,6 +104,7 @@ export class ProfessionalMasterApiService {
                     territory_id: Number(rest.territory_id),
                     dep_id: Number(rest.dep_id),
                     route_id: Number(rest.route_id),
+                    contract_type: String(rest.contract_type),
                     contract_value: Number(rest.contract_value),
                     contract_tenure: Number(rest.contract_tenure),
                     patients_per_week: Number(rest.patients_per_week),
@@ -157,6 +158,7 @@ export class ProfessionalMasterApiService {
                     "territory_id": professional.territory_id !== undefined ? Number(professional.territory_id) : null,
                     "dep_id": professional.dep_id !== undefined ? Number(professional.dep_id) : null,
                     "route_id": professional.route_id !== undefined ? Number(professional.route_id) : null,
+                    "contract_type": professional.contract_type !== undefined ? String(professional.contract_type) : null,             
                     "contract_value": professional.contract_value !== undefined ? Number(professional.contract_value) : null,
                     "contract_tenure": professional.contract_tenure !== undefined ? Number(professional.contract_tenure) : null,
                     "patients_per_week": professional.patients_per_week !== undefined ? Number(professional.patients_per_week) : null,
@@ -229,6 +231,7 @@ export class ProfessionalMasterApiService {
             'Route.slug AS route_name',
             'Professional.academic_background AS academic_background',
             'Professional.visit_fee AS visit_fee',
+            'Professional.contract_type AS contract_type',
             // organization, contact no, chamber, route
             'Professional.mobile_number AS contact_no',
           ])
