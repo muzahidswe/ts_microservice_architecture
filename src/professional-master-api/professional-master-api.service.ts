@@ -108,8 +108,8 @@ export class ProfessionalMasterApiService {
                     patients_per_week: Number(rest.patients_per_week),
                     baby_food_prescriptions: Number(rest.baby_food_prescriptions),
                     prescription_for_mother_smile: Number(rest.prescription_for_mother_smile),
-                    activation_status: 0,
-                    request_status: 2,
+                    activation_status: 0, // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
+                    request_status: 2, // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request; 4 = Deactivate Request
                     comments: rest.comments,
                     updated_by: rest.created_by
                   })
@@ -165,7 +165,7 @@ export class ProfessionalMasterApiService {
                     "request_date": new Date(),
                     "comments": professional.comments !== undefined ? String(professional.comments) : null,
                     "activation_status": 0,  // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
-                    "request_status": 3,     // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+                    "request_status": 3,     // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request; 4 = Deactivate Request
                     "created_by": professional.created_by !== undefined ? Number(professional.created_by) : null,
                   };
                   let insertLog = await this.masterProfessionalListRepository.insert(insertData);
@@ -237,12 +237,13 @@ export class ProfessionalMasterApiService {
                 WHEN Professional.activation_status = 1 THEN 'Active'
                 WHEN Professional.activation_status = 2 THEN 'Deactivate'
               END`, 'activation_status')
-          // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+          // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request; 4 = Deactivate Request
           .addSelect(`CASE
                 WHEN Professional.request_status = 0 THEN 'Decline'
                 WHEN Professional.request_status = 1 THEN 'Approved'
                 WHEN Professional.request_status = 2 THEN 'Edit'
                 WHEN Professional.request_status = 3 THEN 'New'
+                WHEN Professional.request_status = 4 THEN 'Deactivate'
               END`, 'request_status')
           .innerJoin('ms_professional_category', 'Category', '`Professional`.`category_id` = `Category`.`id`')
           // to fetch Point
@@ -329,12 +330,13 @@ export class ProfessionalMasterApiService {
                   WHEN Professional.activation_status = 1 THEN 'Active'
                   WHEN Professional.activation_status = 2 THEN 'Deactivate'
                 END`, 'activation_status')
-            // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+            // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request; 4 = Deactivate Request
             .addSelect(`CASE
                   WHEN Professional.request_status = 0 THEN 'Decline'
                   WHEN Professional.request_status = 1 THEN 'Approved'
                   WHEN Professional.request_status = 2 THEN 'Edit'
                   WHEN Professional.request_status = 3 THEN 'New'
+                  WHEN Professional.request_status = 4 THEN 'Deactivate'
                 END`, 'request_status')
             .innerJoin('ms_professional_category', 'Category', '`Professional`.`category_id` = `Category`.`id`')
             // to fetch Point
@@ -466,12 +468,13 @@ export class ProfessionalMasterApiService {
                   WHEN Professional.activation_status = 1 THEN 'Active'
                   WHEN Professional.activation_status = 2 THEN 'Deactivate'
                 END`, 'activation_status')
-            // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+            // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request; 4 = Deactivate Request
             .addSelect(`CASE
                   WHEN Professional.request_status = 0 THEN 'Decline'
                   WHEN Professional.request_status = 1 THEN 'Approved'
                   WHEN Professional.request_status = 2 THEN 'Edit'
                   WHEN Professional.request_status = 3 THEN 'New'
+                  WHEN Professional.request_status = 4 THEN 'Deactivate'
                 END`, 'request_status')
             .innerJoin('ms_professional_category', 'Category', '`Professional`.`category_id` = `Category`.`id`')
             // to fetch Point
@@ -604,7 +607,7 @@ export class ProfessionalMasterApiService {
   async professionalUpdateAsApproved(professionalStatusUpdateDto: ProfessionalStatusUpdateDto): Promise<any> {
     return new Promise(async (resolve, reject) => {
       // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
-      // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+      // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request; 4 = Deactivate Request
       try {
         this.logger.log('Updating Professional Status');
         const payload = { ...professionalStatusUpdateDto };
@@ -619,7 +622,7 @@ export class ProfessionalMasterApiService {
               activation_date: new Date(),
               updated_by: payload.updated_by !== undefined ? Number(payload.updated_by) : null
             })
-            .andWhere("ms_professional_list.id IN(:professional_ids)", { professional_ids: payload.professional_ids })
+            .where("ms_professional_list.id IN(:professional_ids)", { professional_ids: payload.professional_ids })
             .andWhere("ms_professional_list.activation_status IN(:activation_status)", { activation_status: [0, 2] })
             // .andWhere("ms_professional_list.request_status IN(:activation_status)", { activation_status : [0, 1, 2, 3] })
             .execute();
@@ -638,7 +641,7 @@ export class ProfessionalMasterApiService {
   async professionalUpdateAsDecline(professionalStatusUpdateDto: ProfessionalStatusUpdateDto): Promise<any> {
     return new Promise(async (resolve, reject) => {
       // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
-      // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+      // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request; 4 = Deactivate Request
       try {
         this.logger.log('Updating Professional Status');
         const payload = { ...professionalStatusUpdateDto };
@@ -653,7 +656,7 @@ export class ProfessionalMasterApiService {
               activation_date: new Date(),
               updated_by: payload.updated_by !== undefined ? Number(payload.updated_by) : null
             })
-            .andWhere("ms_professional_list.id IN(:professional_ids)", { professional_ids: payload.professional_ids })
+            .where("ms_professional_list.id IN(:professional_ids)", { professional_ids: payload.professional_ids })
             .andWhere("ms_professional_list.activation_status IN(:activation_status)", { activation_status: [0] })
             // .andWhere("ms_professional_list.request_status IN(:activation_status)", { activation_status : [2, 3] })
             .execute();
@@ -672,7 +675,7 @@ export class ProfessionalMasterApiService {
   async professionalUpdateAsDeactivate(professionalStatusUpdateDto: ProfessionalStatusUpdateDto): Promise<any> {
     return new Promise(async (resolve, reject) => {
       // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
-      // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request
+      // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request; 4 = Deactivate Request
       try {
         this.logger.log('Updating Professional Status');
         const payload = { ...professionalStatusUpdateDto };
@@ -686,7 +689,40 @@ export class ProfessionalMasterApiService {
               activation_date: new Date(),
               updated_by: payload.updated_by !== undefined ? Number(payload.updated_by) : null
             })
-            .andWhere("ms_professional_list.id IN(:professional_ids)", { professional_ids: payload.professional_ids })
+            .where("ms_professional_list.id IN(:professional_ids)", { professional_ids: payload.professional_ids })
+            .andWhere("ms_professional_list.activation_status IN(:activation_status)", { activation_status: [1] })
+            // .andWhere("ms_professional_list.request_status IN(:activation_status)", { activation_status : [1] })
+            .execute();
+
+          resolve((updateProfessional.affected > 0) ? true : false);
+        } else {
+          resolve(false);
+        }
+      } catch (errror) {
+        console.log(errror);
+        reject(new HttpException('Forbidden', HttpStatus.FORBIDDEN));
+      }
+    });
+  }
+
+  async professionalUpdateRequestAsDeactivate(professionalStatusUpdateDto: ProfessionalStatusUpdateDto): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      // activation_status 0 = Inactive Professional; 1 = Active Professional; 2 = Deactivate Professional
+      // request_status 0 = Decline Request; 1 = Approved Request; 2 = Edit Request; 3 = New Request; 4 = Deactivate Request
+      try {
+        this.logger.log('Updating Professional Status');
+        const payload = { ...professionalStatusUpdateDto };
+        if (payload.professional_ids.length != 0) {
+          const updateProfessional = await this.masterProfessionalListRepository
+            .createQueryBuilder()
+            .update('ms_professional_list')
+            .set({
+              request_status: 4,
+              activated_by: payload.updated_by !== undefined ? Number(payload.updated_by) : null,
+              activation_date: new Date(),
+              updated_by: payload.updated_by !== undefined ? Number(payload.updated_by) : null
+            })
+            .where("ms_professional_list.id IN(:professional_ids)", { professional_ids: payload.professional_ids })
             .andWhere("ms_professional_list.activation_status IN(:activation_status)", { activation_status: [1] })
             // .andWhere("ms_professional_list.request_status IN(:activation_status)", { activation_status : [1] })
             .execute();

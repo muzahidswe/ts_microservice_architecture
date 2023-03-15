@@ -155,6 +155,22 @@ export class ProfessionalMasterApiController {
     res.status(HttpStatus.OK).json(result);
   }
 
+  @Patch('professional-update-request-as-deactivate')
+  async professionalUpdateRequestAsDeactivate(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Body() professionalStatusUpdateDto: ProfessionalStatusUpdateDto
+  )
+  {
+    const updateRequest: any = await this.professionalMasterApiService.professionalUpdateRequestAsDeactivate(professionalStatusUpdateDto);
+    const result: object = {
+      'success' : updateRequest,
+      'message' : updateRequest ? 'Professional Deactivate Request Saved Successfully.' : 'Professional Deactivate Request Saved Failed.',
+      'data' : []
+    }
+    res.status(HttpStatus.OK).json(result);
+  }
+
   @Get('/professional-sync-count/:user_id/:date?')
   async professionalSyncCount(
     @Param('user_id') user_id: number,
